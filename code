@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>资源加载容错框架</title>
+    <style>
+        .error-placeholder {
+            background-color: #f8f9fa;
+            border: 1px dashed #dc3545;
+            padding: 10px;
+            color: #dc3545;
+            font-size: 0.9em;
+        }
+        .resource-error { display: none; }
+        .resource-failed .resource-error { display: block; }
+    </style>
+</head>
+<body>
+    <!-- 框架内容区域 -->
+    <iframe 
+        id="contentFrame" 
+        src="https://operate-js.github.io/text.html" 
+        width="100%" 
+        height="600"
+        frameborder="0"
+        loading="lazy"
+        onerror="handleFrameError(this)"
+    ></iframe>
+    
+    <!-- 资源错误提示容器 -->
+    <div id="errorContainer" class="resource-error">
+        <p>⚠️ 部分资源加载失败，已自动跳过</p>
+    </div>
+
+    <script>
+        // 资源错误处理系统
+        function handleResourceError(element) {
+            console.warn(`资源加载失败: ${element.src || element.href}`);
+            
+            // 添加错误标记
+            element.classList.add('resource-failed');
+            
+            // 创建错误占位符
+            const placeholder = document.createElement('div');
+            placeholder.className = 'error-placeholder';
+            placeholder.textContent = `资源加载失败: ${element.src || element.href}`;
+            
+            // 插入占位符
+            element.parentNode.insertBefore(placeholder, element.nextSibling);
+            
+            // 禁用失败资源
+            if(element.tagName === 'SCRIPT') {
+                element.parentNode.removeChild(element);
+            } else {
+                element.style.display = 'none';
+            }
+            
+            // 显示全局错误提示
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        // 框架加载错误处理
+        function handleFrameError(frame) {
+            console.error(`框架内容加载失败: ${frame.src}`);
+            frame.style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        // 初始化资源监控
+        document.addEventListener('DOMContentLoaded', () => {
+            // 图片错误处理
+            document.querySelectorAll('img').forEach(img => {
+                img.onerror = () => handleResourceError(img);
+            });
+
+            // CSS错误处理
+            document.querySelectorAll('link[rel="stylesheet"]').forEach(css => {
+                css.onerror = () => handleResourceError(css);
+            });
+
+            // 脚本错误处理
+            document.querySelectorAll('script[src]').forEach(script => {
+                script.onerror = () => handleResourceError(script);
+            });
+        });
+    </script>
+</body>
+</html>
