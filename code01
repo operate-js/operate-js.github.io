@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动端WebGL扩展安装指南</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .browser-support {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .browser {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            text-align: center;
+            border-radius: 6px;
+            background: #e3f2fd;
+        }
+        .step {
+            margin: 25px 0;
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        code {
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .warning {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 20px 0;
+        }
+        #detectionResult {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 25px auto;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>移动端WebGL扩展安装指南</h1>
+    
+    <div class="card">
+        <h2>浏览器兼容性检测</h2>
+        <p>当前浏览器支持状态：</p>
+        <div id="detectionResult">正在检测中...</div>
+        
+        <div class="browser-support">
+            <div class="browser">Chrome ✔️</div>
+            <div class="browser">Firefox ✔️</div>
+            <div class="browser">Safari ✔️ (iOS 13+)</div>
+            <div class="browser">Edge ✔️</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>WebGL扩展安装指南</h2>
+        
+        <div class="warning">
+            <strong>注意：</strong> 移动端无法直接安装浏览器扩展，但可通过以下方法提升兼容性
+        </div>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <h3>启用WebGL支持</h3>
+            <p>在移动端浏览器设置中启用WebGL硬件加速：</p>
+            <ul>
+                <li>Chrome安卓：访问 <code>chrome://flags</code> → 启用 <code>WebGL 2.0</code></li>
+                <li>Safari iOS：设置 → Safari → 高级 → 打开 <code>WebGL</code></li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <h3>使用Polyfill库</h3>
+            <p>在项目中添加兼容性库解决扩展支持问题：</p>
+            <pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/webgl-ess-polyfill@2.0.0"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/webglew@1.0.0"&gt;&lt;/script&gt;</code></pre>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <h3>检测并启用扩展</h3>
+            <p>在JavaScript代码中添加扩展检测逻辑：</p>
+            <pre><code>const gl = canvas.getContext('webgl');
+const extensions = [
+    'OES_texture_float',
+    'EXT_color_buffer_float'
+];
+
+extensions.forEach(ext => {
+    if (gl.getExtension(ext)) {
+        console.log(`${ext} 已启用`);
+    } else {
+        console.warn(`${ext} 不支持`);
+    }
+});</code></pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>调试工具集成</h2>
+        <p>在开发环境中使用以下工具调试WebGL：</p>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <h3>WebGL Inspector</h3>
+            <p>通过远程调试连接移动设备：</p>
+            <ol>
+                <li>在桌面Chrome中访问 <code>chrome://inspect</code></li>
+                <li>启用USB调试连接移动设备</li>
+                <li>选择移动端WebGL页面进行调试</li>
+            </ol>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <h3>GLSL Shader编辑器</h3>
+            <p>在VS Code中安装扩展：</p>
+            <ul>
+                <li>搜索安装 <code>WebGL GLSL Shader Editor</code></li>
+                <li>支持实时着色器编辑和错误检测</li>
+            </ul>
+        </div>
+    </div>
+
+    <button onclick="checkCompatibility()">重新检测兼容性</button>
+
+    <script>
+        function checkCompatibility() {
+            const resultEl = document.getElementById('detectionResult');
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                
+                if (!gl) {
+                    resultEl.innerHTML = `<div class="error">❌ 浏览器不支持WebGL，请升级或更换浏览器</div>`;
+                    return;
+                }
+                
+                const extensions = [
+                    'OES_texture_float',
+                    'EXT_color_buffer_float',
+                    'WEBGL_compressed_texture_s3tc'
+                ];
+                
+                let supported = [];
+                let unsupported = [];
+                
+                extensions.forEach(ext => {
+                    gl.getExtension(ext) ? supported.push(ext) : unsupported.push(ext);
+                });
+                
+                let message = `<div class="success">✅ 支持WebGL核心功能</div>`;
+                message += `<p>支持的扩展: ${supported.join(', ') || '无'}</p>`;
+                message += `<p>不支持的扩展: ${unsupported.join(', ') || '无'}</p>`;
+                
+                resultEl.innerHTML = message;
+            } catch (e) {
+                resultEl.innerHTML = `<div class="error">❌ 检测失败: ${e.message}</div>`;
+            }
+        }
+        
+        // 页面加载时自动检测
+        window.onload = checkCompatibility;
+    </script>
+</body>
+</html>
