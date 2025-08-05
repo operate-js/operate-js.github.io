@@ -3,126 +3,1561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>移动端WebGL扩展支持</title>
-    <!-- 添加所需WebGL扩展库 -->
-    <script src="https://cdn.jsdelivr.net/npm/webgl-ess-polyfill@2.0.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webglew@1.0.0"></script>
-    
+    <title>23级护理四班交流论坛</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #858796;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+            --admin: #e74a3b;
+            --teacher: #4e73df;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
-            max-width: 900px;
-            margin: 0 auto;
+            background-color: #f8f9fc;
+            color: #333;
+            line-height: 1.6;
         }
-        .status {
-            padding: 15px;
-            margin: 15px 0;
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 头部导航样式 */
+        header {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            padding: 0.8rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
             border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .success {
-            background-color: #e8f5e9;
-            border-left: 4px solid #4caf50;
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
-        .warning {
-            background-color: #fff8e1;
-            border-left: 4px solid #ffc107;
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
         }
-        #extensionsList {
-            columns: 2;
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .admin-avatar {
+            background-color: var(--admin);
+        }
+
+        .teacher-avatar {
+            background-color: var(--teacher);
+        }
+
+        /* 导航栏样式 */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            padding: 20px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .nav-item:hover {
+            background-color: #f0f3ff;
+        }
+
+        .nav-item.active {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+        }
+
+        .page-content {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f3ff;
+            color: var(--dark);
+        }
+
+        /* 学习资料卡片样式 */
+        .material-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .material-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .material-header {
+            background: linear-gradient(to right, #4e73df, #224abe);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .teacher-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .material-body {
+            padding: 20px;
+        }
+
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 帖子列表样式 */
+        .post-item {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--info);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .author-name {
+            font-weight: 600;
+        }
+
+        .post-time {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        .post-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .post-content {
+            line-height: 1.7;
+        }
+
+        /* 聊天区域样式 */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9ff;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            max-width: 80%;
+        }
+
+        .current-user-message {
+            margin-left: auto;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .message-sender {
+            font-weight: 600;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .message-content {
+            background: #e9ecef;
+            padding: 12px 15px;
+            border-radius: 18px;
+            display: inline-block;
+        }
+
+        .current-user-message .message-content {
+            background: #4e73df;
+            color: white;
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        /* 荣誉墙样式 */
+        .honor-wall {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .honor-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .honor-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f0f3ff;
+        }
+
+        .honor-body {
+            padding: 20px;
+        }
+
+        .honor-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .honor-desc {
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: #f8fbff;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            transition: transform 0.4s;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .close-modal {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+
+        /* 加载指示器 */
+        .loading-indicator {
+            padding: 30px;
+            text-align: center;
+            color: var(--secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(78, 115, 223, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 错误提示 */
+        .error-message {
+            padding: 20px;
+            background-color: #fce4e2;
+            border-left: 4px solid var(--danger);
+            margin: 20px 0;
+            color: var(--danger);
+        }
+
+        /* 全局错误提示 */
+        #global-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--danger);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 2000;
+            font-weight: 600;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .main-content {
+                max-height: none;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .honor-wall {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>移动端WebGL扩展支持</h1>
-    
-    <div id="statusMessage" class="status">
-        正在加载WebGL扩展...
+    <!-- 头部导航 -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-users"></i>
+            <span>23级护理四班交流论坛</span>
+        </div>
+        <div class="user-controls">
+            <button id="loginBtn" class="btn btn-primary">登录</button>
+            <div id="userAvatar" class="user-avatar" style="display: none;">U</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 侧边导航栏 -->
+        <div class="sidebar">
+            <div class="nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" data-page="forum">
+                <i class="fas fa-comments"></i>
+                <span>班级论坛</span>
+            </div>
+            <div class="nav-item" data-page="chat">
+                <i class="fas fa-comment-dots"></i>
+                <span>实时聊天</span>
+            </div>
+            <div class="nav-item" data-page="honor">
+                <i class="fas fa-trophy"></i>
+                <span>荣誉墙</span>
+            </div>
+            <div class="nav-item" data-page="materials">
+                <i class="fas fa-book"></i>
+                <span>学习资料</span>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 首页 -->
+            <div id="homePage" class="page-content active">
+                <h2 class="page-title">班级公告</h2>
+                <div class="announcement">
+                    <p>欢迎来到23级护理四班交流论坛！</p>
+                    <p>这里是班级信息发布、学习资源共享和同学交流的平台。</p>
+                </div>
+                
+                <h2 class="page-title">学习资料</h2>
+                <div id="materialsContainer">
+                    <!-- 学习资料动态加载 -->
+                </div>
+            </div>
+
+            <!-- 班级论坛 -->
+            <div id="forumPage" class="page-content">
+                <h2 class="page-title">班级论坛</h2>
+                <div class="form-group">
+                    <input type="text" id="postTitle" class="form-control" placeholder="帖子标题">
+                </div>
+                <div class="form-group">
+                    <textarea id="postContent" class="form-control" placeholder="帖子内容"></textarea>
+                </div>
+                <button id="postSubmitBtn" class="btn btn-primary">发布帖子</button>
+                
+                <div class="posts-container" style="margin-top: 30px;">
+                    <h3>最新帖子</h3>
+                    <ul id="postList" class="post-list">
+                        <!-- 帖子动态加载 -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 实时聊天 -->
+            <div id="chatPage" class="page-content">
+                <h2 class="page-title">班级聊天室</h2>
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                        <!-- 聊天消息动态加载 -->
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="输入消息...">
+                        <button id="sendMessageBtn" class="btn btn-primary">发送</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 荣誉墙 -->
+            <div id="honorPage" class="page-content">
+                <h2 class="page-title">班级荣誉墙</h2>
+                <div id="honorWall" class="honor-wall">
+                    <!-- 荣誉动态加载 -->
+                </div>
+                
+                <div id="honorEditSection" style="margin-top: 40px; display: none;">
+                    <h3>添加荣誉</h3>
+                    <div class="form-group">
+                        <input type="text" id="honorTitle" class="form-control" placeholder="荣誉标题">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="honorDescription" class="form-control" placeholder="荣誉描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">荣誉图片</label>
+                        <div class="upload-area">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
+                            <p>点击或拖拽文件到此处上传</p>
+                            <input type="file" id="honorImage" style="display: none;">
+                        </div>
+                    </div>
+                    <button id="addHonorBtn" class="btn btn-primary">添加荣誉</button>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div style="margin-top: 25px;">
-        <canvas id="glCanvas" width="400" height="300" style="border: 1px solid #ddd; max-width: 100%;"></canvas>
-    </div>
-    
-    <div>
-        <h3>已启用的扩展:</h3>
-        <div id="extensionsList"></div>
+
+    <!-- 登录模态框 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">用户登录</h3>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">邮箱地址</label>
+                    <input type="email" id="email" class="form-control" placeholder="请输入邮箱">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">验证码</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="code" class="form-control" placeholder="请输入验证码">
+                        <button id="getCodeBtn" class="btn btn-primary">获取验证码</button>
+                    </div>
+                </div>
+                <div id="loginStatus" style="margin-top: 15px; color: var(--danger);"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="submitLogin" class="btn btn-primary">登录</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 页面加载完成后初始化
-        window.onload = function() {
-            const canvas = document.getElementById('glCanvas');
-            const statusEl = document.getElementById('statusMessage');
-            const extensionsEl = document.getElementById('extensionsList');
-            
-            // 尝试获取WebGL上下文
-            let gl = null;
-            try {
-                gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            } catch (e) {
-                statusEl.innerHTML = `<div class="warning">❌ 无法创建WebGL上下文: ${e.message}</div>`;
-                return;
-            }
-            
-            if (!gl) {
-                statusEl.innerHTML = '<div class="warning">❌ 浏览器不支持WebGL</div>';
-                return;
-            }
-            
-            statusEl.innerHTML = '<div class="success">✅ WebGL初始化成功！正在加载扩展...</div>';
-            
-            // 尝试加载所有可能的扩展
-            const extensionsToCheck = [
-                'EXT_color_buffer_float',
-                'OES_texture_float',
-                'OES_texture_float_linear',
-                'OES_texture_half_float',
-                'OES_texture_half_float_linear',
-                'OES_standard_derivatives',
-                'EXT_shader_texture_lod',
-                'ANGLE_instanced_arrays',
-                'WEBGL_compressed_texture_s3tc',
-                'EXT_disjoint_timer_query'
-            ];
-            
-            let supported = [];
-            let unsupported = [];
-            
+        // 全局错误处理
+        window.addEventListener('error', function(event) {
+            console.error('全局错误:', event.error);
+            // 显示错误提示
+            const errorContainer = document.createElement('div');
+            errorContainer.id = 'global-error';
+            errorContainer.textContent = '发生错误: ' + event.error.message;
+            document.body.prepend(errorContainer);
+            // 5秒后移除错误提示
             setTimeout(() => {
-                // 检查扩展可用性
-                extensionsToCheck.forEach(ext => {
-                    try {
-                        const extension = gl.getExtension(ext);
-                        if (extension) {
-                            supported.push(`<li>${ext} ✅</li>`);
-                        } else {
-                            unsupported.push(`<li>${ext} ❌</li>`);
+                if (document.getElementById('global-error')) {
+                    document.getElementById('global-error').remove();
+                }
+            }, 5000);
+        });
+
+        // 全局变量
+        const USER_DATA_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Forum/User%20Data/";
+        const CHAT_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Chat%20room/";
+        const POST_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Post/";
+        const TEACHER_PATH = "https://api.github.com/repos/operate-js/text-3/contents/root/Teacher%20List/";
+        const HONOR_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Wall%20of%20Fame/";
+        const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
+        
+        const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
+        
+        // 解密5次的密钥
+        const decryptBase64 = (str, times) => {
+            for (let i = 0; i < times; i++) {
+                str = atob(str);
+            }
+            return str;
+        };
+        
+        const API_KEY = decryptBase64("VmpKd1MyTXdNVWhTYTJ4WFlsZDRXbFJVUWt0aU1YQkdWMVJTYkZKVVJsZFZNblJUVldzeFIyTkdhRlZXUlVwNVdrUktWMUpYU2tkaFJuQnBVak5vTVZkc1pEUlNNRFZIVjJ0V1UySkhhRnBVVlZKelpHeHNXV05IT1ZaU01GcDVXbFZTVDFaWFNsZFRWRUpYVWpOb2VsWnJWVEZXTVZaeVpFZHdUbUpGY0hwV1YzUnJWREF3ZVZWdVVsTmhiRnBSVld0a2IxVkdXa2RWYXpsVFZtdHNNMXBJY0ZkaFJscDBXa1JPVm1GclduSlpiWGhhWld4T1ZWRnNTbGRXVm5CS1ZteFdWMk14V1hoVVdHUlRZa1p3VkZsc1pGTmxiR3QzVm01a1QxcDZNRGs9", 5);
+        
+        let currentUser = null;
+        let isAdmin = false;
+        let isTeacher = false;
+        
+        // DOM元素
+        const loginBtn = document.getElementById('loginBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.getElementById('closeModal');
+        const getCodeBtn = document.getElementById('getCodeBtn');
+        const submitLogin = document.getElementById('submitLogin');
+        const loginStatus = document.getElementById('loginStatus');
+        const navItems = document.querySelectorAll('.nav-item');
+        const pageContents = document.querySelectorAll('.page-content');
+        
+        // 页面导航
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // 更新活动状态
+                navItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 显示对应页面
+                const pageId = this.dataset.page + 'Page';
+                pageContents.forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+                
+                // 加载对应页面数据
+                switch(pageId) {
+                    case 'homePage':
+                        loadMaterials();
+                        break;
+                    case 'forumPage':
+                        loadPosts();
+                        break;
+                    case 'chatPage':
+                        loadChatMessages();
+                        break;
+                    case 'honorPage':
+                        loadHonors();
+                        break;
+                }
+            });
+        });
+        
+        // 登录模态框控制
+        loginBtn.addEventListener('click', () => {
+            loginModal.classList.add('active');
+        });
+        
+        closeModal.addEventListener('click', () => {
+            loginModal.classList.remove('active');
+        });
+        
+        // 点击模态框外部关闭
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('active');
+            }
+        });
+        
+        // 获取验证码
+        getCodeBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email)) {
+                loginStatus.textContent = '请输入有效的邮箱地址';
+                return;
+            }
+            
+            // 禁用按钮30秒
+            getCodeBtn.disabled = true;
+            let countdown = 30;
+            
+            // 生成6位随机验证码
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // 存储验证码和时间戳
+            localStorage.setItem('verificationCode', code);
+            localStorage.setItem('codeTimestamp', Date.now());
+            localStorage.setItem('userEmail', email);
+            
+            // 发送验证码到API
+            try {
+                const response = await fetch(EMAIL_API, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_type: 'send_email_request',
+                        client_payload: {
+                            email: email,
+                            code: code
                         }
-                    } catch (e) {
-                        unsupported.push(`<li>${ext} ❌ (Error: ${e.message})</li>`);
+                    })
+                });
+                
+                if (response.ok) {
+                    loginStatus.textContent = `验证码已发送至 ${email}，有效期为5分钟`;
+                } else {
+                    const errorData = await response.json();
+                    loginStatus.textContent = `发送失败: ${errorData.message || response.status}`;
+                }
+            } catch (error) {
+                loginStatus.textContent = `API错误: ${error.message}`;
+            }
+            
+            // 倒计时
+            const timer = setInterval(() => {
+                getCodeBtn.textContent = `重新获取(${countdown})`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    getCodeBtn.disabled = false;
+                    getCodeBtn.textContent = '获取验证码';
+                }
+            }, 1000);
+        });
+        
+        // 提交登录
+        submitLogin.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const code = document.getElementById('code').value;
+            
+            if (!email) {
+                loginStatus.textContent = '请输入邮箱地址';
+                return;
+            }
+            
+            if (!code || code.length !== 6) {
+                loginStatus.textContent = '请输入6位验证码';
+                return;
+            }
+            
+            // 验证验证码
+            const storedCode = localStorage.getItem('verificationCode');
+            const timestamp = localStorage.getItem('codeTimestamp');
+            
+            if (!storedCode || !timestamp) {
+                loginStatus.textContent = '请先获取验证码';
+                return;
+            }
+            
+            // 检查验证码是否在5分钟内
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - parseInt(timestamp)) / (1000 * 60); // 分钟
+            
+            if (timeDiff > 5) {
+                loginStatus.textContent = '验证码已过期';
+                return;
+            }
+            
+            if (code === storedCode) {
+                loginStatus.textContent = '登录成功！';
+                
+                // 更新用户界面
+                setTimeout(() => {
+                    loginModal.classList.remove('active');
+                    loginBtn.style.display = 'none';
+                    userAvatar.style.display = 'flex';
+                    userAvatar.textContent = email.charAt(0).toUpperCase();
+                    
+                    // 保存用户信息
+                    currentUser = email;
+                    localStorage.setItem('currentUser', email);
+                    
+                    // 检查是否为管理员
+                    isAdmin = (email === '3343363350@qq.com');
+                    
+                    // 检查是否为教师
+                    isTeacher = isAdmin || email.includes('teacher');
+                    
+                    // 更新UI权限
+                    updateUIPermissions();
+                    
+                    // 保存用户数据到云存储
+                    saveUserData();
+                }, 1000);
+            } else {
+                loginStatus.textContent = '验证码错误，请重新输入';
+            }
+        });
+        
+        // 更新UI权限
+        function updateUIPermissions() {
+            // 显示教师上传区域
+            document.getElementById('honorEditSection').style.display = isTeacher ? 'block' : 'none';
+            
+            // 更新用户头像样式
+            if (isAdmin) {
+                userAvatar.classList.add('admin-avatar');
+            } else if (isTeacher) {
+                userAvatar.classList.add('teacher-avatar');
+            }
+        }
+        
+        // 保存用户数据到云存储
+        async function saveUserData() {
+            if (!currentUser) return;
+            
+            const userData = {
+                email: currentUser,
+                isAdmin: isAdmin,
+                isTeacher: isTeacher,
+                lastLogin: new Date().toISOString()
+            };
+            
+            try {
+                await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Add user data for ${currentUser}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(userData))))
+                    })
+                });
+            } catch (error) {
+                console.error('保存用户数据失败:', error);
+            }
+        }
+        
+        // 安全的数据解析函数
+        const safeParseData = (content) => {
+            try {
+                // 尝试直接解析JSON
+                return JSON.parse(content);
+            } catch (e1) {
+                try {
+                    // 尝试Base64解码
+                    const decoded = atob(content);
+                    return JSON.parse(decoded);
+                } catch (e2) {
+                    // 输出无法解密的JSON内容到控制台
+                    console.error('无法解析的数据内容:', content);
+                    return null;
+                }
+            }
+        };
+        
+        // 加载学习资料
+        async function loadMaterials() {
+            const materialsContainer = document.getElementById('materialsContainer');
+            materialsContainer.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            
+            try {
+                const response = await fetch(`${MATERIALS_PATH}?recursive=1`, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
                     }
                 });
                 
-                extensionsEl.innerHTML = `<ul>${supported.join('')}</ul>`;
-                
-                if (supported.length > 0) {
-                    statusEl.innerHTML += `<p>已启用 ${supported.length} 个扩展</p>`;
-                } else {
-                    statusEl.innerHTML += `<p class="warning">未能启用任何扩展</p>`;
+                if (!response.ok) {
+                    materialsContainer.innerHTML = '<p class="error-message">加载学习资料失败</p>';
+                    return;
                 }
                 
-                // 初始化基本WebGL场景
-                try {
-                    gl.clearColor(0.2, 0.3, 0.8, 1.0);
-                    gl.clear(gl.COLOR_BUFFER_BIT);
+                const data = await response.json();
+                const teachers = {};
+                
+                // 组织教师资料
+                data.forEach(item => {
+                    if (item.type === 'dir') {
+                        teachers[item.name] = {
+                            name: item.name,
+                            files: []
+                        };
+                    }
+                });
+                
+                // 获取每个教师的文件
+                for (const teacher of Object.values(teachers)) {
+                    try {
+                        const teacherResponse = await fetch(`${MATERIALS_PATH}${encodeURIComponent(teacher.name)}`, {
+                            headers: {
+                                'Authorization': `Bearer ${API_KEY}`,
+                                'Accept': 'application/vnd.github+json'
+                            }
+                        });
+                        
+                        if (teacherResponse.ok) {
+                            const teacherData = await teacherResponse.json();
+                            teacher.files = teacherData.map(file => ({
+                                name: file.name,
+                                download_url: file.download_url
+                            }));
+                        }
+                    } catch (error) {
+                        console.error('加载教师资料错误:', error);
+                    }
+                }
+                
+                // 渲染学习资料
+                materialsContainer.innerHTML = '';
+                Object.values(teachers).forEach(teacher => {
+                    if (teacher.files.length === 0) return;
                     
-                    statusEl.innerHTML += `<p>WebGL场景已渲染</p>`;
-                } catch (e) {
-                    statusEl.innerHTML += `<p class="warning">渲染时出错: ${e.message}</p>`;
+                    const materialCard = document.createElement('div');
+                    materialCard.className = 'material-card';
+                    materialCard.innerHTML = `
+                        <div class="material-header">
+                            <h3>${teacher.name}</h3>
+                            <span class="teacher-badge">教师</span>
+                        </div>
+                        <div class="material-body">
+                            <ul class="file-list">
+                                ${teacher.files.map(file => `
+                                    <li>
+                                        <span>${file.name}</span>
+                                        <div class="file-actions">
+                                            <button class="btn btn-primary download-btn" data-url="${file.download_url}">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            ${isTeacher ? `<button class="btn btn-danger delete-file-btn" data-path="${MATERIALS_PATH}${encodeURIComponent(teacher.name)}/${encodeURIComponent(file.name)}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>` : ''}
+                                        </div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    materialsContainer.appendChild(materialCard);
+                });
+                
+                // 添加下载和删除事件
+                document.querySelectorAll('.download-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const url = btn.dataset.url;
+                        window.open(url, '_blank');
+                    });
+                });
+                
+                document.querySelectorAll('.delete-file-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (confirm('确定要删除这个文件吗？')) {
+                            try {
+                                const response = await fetch(btn.dataset.path, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${API_KEY}`,
+                                        'Accept': 'application/vnd.github+json'
+                                    }
+                                });
+                                
+                                if (response.ok) {
+                                    loadMaterials(); // 重新加载资料
+                                } else {
+                                    alert('删除文件失败');
+                                }
+                            } catch (error) {
+                                console.error('删除文件错误:', error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                materialsContainer.innerHTML = '<p class="error-message">加载学习资料时出错</p>';
+                console.error('加载学习资料错误:', error);
+            }
+        }
+        
+        // 加载帖子
+        async function loadPosts() {
+            const postList = document.getElementById('postList');
+            postList.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            
+            try {
+                const response = await fetch(POST_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    postList.innerHTML = '<p class="error-message">加载帖子失败</p>';
+                    return;
                 }
-            }, 300); // 给扩展库时间加载
-        };
+                
+                const data = await response.json();
+                postList.innerHTML = '';
+                
+                data.forEach(item => {
+                    try {
+                        const postData = safeParseData(item.content);
+                        if (!postData) return;
+                        
+                        const email = postData.email || 'unknown@example.com';
+                        
+                        const postItem = document.createElement('li');
+                        postItem.className = 'post-item';
+                        postItem.innerHTML = `
+                            <div class="post-header">
+                                <div class="post-author">
+                                    <div class="author-avatar ${postData.isAdmin ? 'admin-avatar' : (postData.isTeacher ? 'teacher-avatar' : '')}">
+                                        ${email.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div class="author-name">${email}</div>
+                                        <div class="post-time">${new Date(postData.timestamp).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="post-actions">
+                                    ${(currentUser === email || isAdmin) ? 
+                                        `<button class="btn btn-danger delete-post-btn" data-id="${postData.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>` : ''}
+                                </div>
+                            </div>
+                            <h3 class="post-title">${postData.title}</h3>
+                            <div class="post-content">
+                                <p>${postData.content}</p>
+                            </div>
+                        `;
+                        postList.appendChild(postItem);
+                    } catch (e) {
+                        console.error('解析帖子错误:', e, item);
+                    }
+                });
+                
+                // 添加删除事件
+                document.querySelectorAll('.delete-post-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (confirm('确定要删除这个帖子吗？')) {
+                            try {
+                                const response = await fetch(`${POST_PATH}${btn.dataset.id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${API_KEY}`,
+                                        'Accept': 'application/vnd.github+json'
+                                    }
+                                });
+                                
+                                if (response.ok) {
+                                    loadPosts(); // 重新加载帖子
+                                } else {
+                                    alert('删除帖子失败');
+                                }
+                            } catch (error) {
+                                console.error('删除帖子错误:', error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                postList.innerHTML = '<p class="error-message">加载帖子时出错</p>';
+                console.error('加载帖子错误:', error);
+            }
+        }
+        
+        // 发布帖子
+        document.getElementById('postSubmitBtn').addEventListener('click', async () => {
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+            
+            if (!title || !content) {
+                alert('请填写标题和内容');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('请先登录');
+                return;
+            }
+            
+            const postData = {
+                id: Date.now().toString(),
+                title: title,
+                content: content,
+                email: currentUser,
+                isAdmin: isAdmin,
+                isTeacher: isTeacher,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(postData))));
+                
+                const response = await fetch(`${POST_PATH}${postData.id}.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `New post by ${currentUser}`,
+                        content: encodedContent
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('帖子发布成功');
+                    document.getElementById('postTitle').value = '';
+                    document.getElementById('postContent').value = '';
+                    loadPosts(); // 重新加载帖子
+                } else {
+                    alert('帖子发布失败');
+                }
+            } catch (error) {
+                console.error('发布帖子错误:', error);
+            }
+        });
+        
+        // 加载聊天消息
+        async function loadChatMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            
+            try {
+                const response = await fetch(CHAT_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    chatMessages.innerHTML = '<p class="error-message">加载聊天记录失败</p>';
+                    return;
+                }
+                
+                const data = await response.json();
+                chatMessages.innerHTML = '';
+                
+                data.forEach(item => {
+                    try {
+                        const messageData = safeParseData(item.content);
+                        if (!messageData) return;
+                        
+                        const messageEl = document.createElement('div');
+                        messageEl.className = `message ${messageData.sender === currentUser ? 'current-user-message' : ''}`;
+                        messageEl.innerHTML = `
+                            <div class="message-header">
+                                <span class="message-sender">${messageData.sender}</span>
+                                <span class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                            <div class="message-content">${messageData.content}</div>
+                        `;
+                        chatMessages.appendChild(messageEl);
+                    } catch (e) {
+                        console.error('解析聊天消息错误:', e, item);
+                    }
+                });
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+            } catch (error) {
+                chatMessages.innerHTML = '<p class="error-message">加载聊天记录时出错</p>';
+                console.error('加载聊天记录错误:', error);
+            }
+        }
+        
+        // 发送消息
+        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+            const messageInput = document.getElementById('chatInput');
+            const content = messageInput.value.trim();
+            
+            if (!content) {
+                alert('请输入消息内容');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('请先登录');
+                return;
+            }
+            
+            const messageData = {
+                id: Date.now().toString(),
+                sender: currentUser,
+                content: content,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(messageData))));
+                
+                const response = await fetch(`${CHAT_PATH}${messageData.id}.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `New chat message from ${currentUser}`,
+                        content: encodedContent
+                    })
+                });
+                
+                if (response.ok) {
+                    messageInput.value = '';
+                    loadChatMessages(); // 重新加载消息
+                } else {
+                    alert('发送消息失败');
+                }
+            } catch (error) {
+                console.error('发送消息错误:', error);
+            }
+        });
+        
+        // 加载荣誉墙
+        async function loadHonors() {
+            const honorWall = document.getElementById('honorWall');
+            honorWall.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            
+            try {
+                const response = await fetch(HONOR_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    honorWall.innerHTML = '<p class="error-message">加载荣誉墙失败</p>';
+                    return;
+                }
+                
+                const data = await response.json();
+                honorWall.innerHTML = '';
+                
+                data.forEach(item => {
+                    try {
+                        const honorData = safeParseData(item.content);
+                        if (!honorData) return;
+                        
+                        const honorCard = document.createElement('div');
+                        honorCard.className = 'honor-card';
+                        honorCard.innerHTML = `
+                            <div class="honor-img" style="background-image: url('${honorData.imageUrl || ''}')"></div>
+                            <div class="honor-body">
+                                <h3 class="honor-title">${honorData.title}</h3>
+                                <p class="honor-desc">${honorData.description}</p>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-share"></i> 分享荣誉
+                                </button>
+                                ${isTeacher ? `<button class="btn btn-danger delete-honor-btn" data-id="${honorData.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>` : ''}
+                            </div>
+                        `;
+                        honorWall.appendChild(honorCard);
+                    } catch (e) {
+                        console.error('解析荣誉数据错误:', e, item);
+                    }
+                });
+                
+                // 添加删除事件
+                document.querySelectorAll('.delete-honor-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (confirm('确定要删除这个荣誉吗？')) {
+                            try {
+                                const response = await fetch(`${HONOR_PATH}${btn.dataset.id}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Authorization': `Bearer ${API_KEY}`,
+                                        'Accept': 'application/vnd.github+json'
+                                    }
+                                });
+                                
+                                if (response.ok) {
+                                    loadHonors(); // 重新加载荣誉
+                                } else {
+                                    alert('删除荣誉失败');
+                                }
+                            } catch (error) {
+                                console.error('删除荣誉错误:', error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                honorWall.innerHTML = '<p class="error-message">加载荣誉墙时出错</p>';
+                console.error('加载荣誉墙错误:', error);
+            }
+        }
+        
+        // 添加荣誉
+        document.getElementById('addHonorBtn').addEventListener('click', async () => {
+            const title = document.getElementById('honorTitle').value;
+            const description = document.getElementById('honorDescription').value;
+            const imageInput = document.getElementById('honorImage');
+            
+            if (!title || !description) {
+                alert('请填写标题和描述');
+                return;
+            }
+            
+            const honorData = {
+                id: Date.now().toString(),
+                title: title,
+                description: description,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 如果有图片上传
+            if (imageInput.files.length) {
+                const file = imageInput.files[0];
+                
+                // 检查文件大小
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('图片大小不能超过5MB');
+                    return;
+                }
+                
+                // 上传图片
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    const content = btoa(unescape(encodeURIComponent(reader.result)));
+                    
+                    try {
+                        const imageResponse = await fetch(`${HONOR_PATH}images/${encodeURIComponent(file.name)}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${API_KEY}`,
+                                'Accept': 'application/vnd.github+json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: `Upload honor image: ${title}`,
+                                content: content
+                            })
+                        });
+                        
+                        if (imageResponse.ok) {
+                            honorData.imageUrl = `${HONOR_PATH}images/${encodeURIComponent(file.name)}`;
+                            saveHonorData(honorData);
+                        } else {
+                            alert('上传图片失败');
+                        }
+                    } catch (error) {
+                        console.error('上传图片错误:', error);
+                    }
+                };
+                reader.readAsBinaryString(file);
+            } else {
+                saveHonorData(honorData);
+            }
+        });
+        
+        // 保存荣誉数据
+        async function saveHonorData(honorData) {
+            try {
+                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(honorData))));
+                
+                const response = await fetch(`${HONOR_PATH}${honorData.id}.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Add honor: ${honorData.title}`,
+                        content: encodedContent
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('荣誉添加成功');
+                    document.getElementById('honorTitle').value = '';
+                    document.getElementById('honorDescription').value = '';
+                    document.getElementById('honorImage').value = '';
+                    loadHonors(); // 重新加载荣誉
+                } else {
+                    alert('添加荣誉失败');
+                }
+            } catch (error) {
+                console.error('添加荣誉错误:', error);
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMaterials();
+        });
     </script>
 </body>
 </html>
