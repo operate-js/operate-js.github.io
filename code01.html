@@ -74,7 +74,7 @@
             border: none;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .btn-primary {
@@ -308,15 +308,20 @@
             padding: 20px;
             overflow-y: auto;
             background-color: #f9f9ff;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .message {
             margin-bottom: 20px;
             max-width: 80%;
+            display: flex;
+            flex-direction: column;
         }
 
         .current-user-message {
-            margin-left: auto;
+            align-self: flex-end;
         }
 
         .message-header {
@@ -376,11 +381,23 @@
             overflow: hidden;
         }
 
-        .honor-img {
+        .honor-img-container {
             height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .honor-img {
+            width: 100%;
+            height: 100%;
             background-size: cover;
             background-position: center;
             background-color: #f0f3ff;
+            transition: transform 0.3s;
+        }
+
+        .honor-img:hover {
+            transform: scale(1.05);
         }
 
         .honor-body {
@@ -616,10 +633,6 @@
                 <i class="fas fa-trophy"></i>
                 <span>荣誉墙</span>
             </div>
-            <div class="nav-item" data-page="materials">
-                <i class="fas fa-book"></i>
-                <span>学习资料</span>
-            </div>
         </div>
 
         <!-- 主内容区 -->
@@ -646,6 +659,10 @@
                 </div>
                 <div class="form-group">
                     <textarea id="postContent" class="form-control" placeholder="帖子内容"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">上传图片（可选）</label>
+                    <input type="file" id="postImage" accept="image/*">
                 </div>
                 <button id="postSubmitBtn" class="btn btn-primary">发布帖子</button>
                 
@@ -713,6 +730,10 @@
                     <input type="email" id="email" class="form-control" placeholder="请输入邮箱">
                 </div>
                 <div class="form-group">
+                    <label class="form-label">姓名</label>
+                    <input type="text" id="userName" class="form-control" placeholder="请输入您的真实姓名">
+                </div>
+                <div class="form-group">
                     <label class="form-label">验证码</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="code" class="form-control" placeholder="请输入验证码">
@@ -731,12 +752,10 @@
         // 全局错误处理
         window.addEventListener('error', function(event) {
             console.error('全局错误:', event.error);
-            // 显示错误提示
             const errorContainer = document.createElement('div');
             errorContainer.id = 'global-error';
             errorContainer.textContent = '发生错误: ' + event.error.message;
             document.body.prepend(errorContainer);
-            // 5秒后移除错误提示
             setTimeout(() => {
                 if (document.getElementById('global-error')) {
                     document.getElementById('global-error').remove();
@@ -782,18 +801,15 @@
         // 页面导航
         navItems.forEach(item => {
             item.addEventListener('click', function() {
-                // 更新活动状态
                 navItems.forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
                 
-                // 显示对应页面
                 const pageId = this.dataset.page + 'Page';
                 pageContents.forEach(page => {
                     page.classList.remove('active');
                 });
                 document.getElementById(pageId).classList.add('active');
                 
-                // 加载对应页面数据
                 switch(pageId) {
                     case 'homePage':
                         loadMaterials();
@@ -814,13 +830,25 @@
         // 登录模态框控制
         loginBtn.addEventListener('click', () => {
             loginModal.classList.add('active');
+            
+            // 预填充邮箱和姓名
+            const savedEmail = localStorage.getItem('userEmail');
+            const savedUserName = localStorage.getItem('userName');
+            const emailInput = document.getElementById('email');
+            const userNameInput = document.getElementById('userName');
+            
+            if (savedEmail && emailInput) {
+                emailInput.value = savedEmail;
+            }
+            if (savedUserName && userNameInput) {
+                userNameInput.value = savedUserName;
+            }
         });
         
         closeModal.addEventListener('click', () => {
             loginModal.classList.remove('active');
         });
         
-        // 点击模态框外部关闭
         loginModal.addEventListener('click', (e) => {
             if (e.target === loginModal) {
                 loginModal.classList.remove('active');
@@ -837,7 +865,14 @@
                 return;
             }
             
-            // 禁用按钮30秒
+            // 验证姓名
+            const userName = document.getElementById('userName').value;
+            const nameRegex = /^[\u4e00-\u9fa5·]+$/;
+            if (!nameRegex.test(userName)) {
+                loginStatus.textContent = '请输入有效的中国姓名（仅限汉字和·）';
+                return;
+            }
+            
             getCodeBtn.disabled = true;
             let countdown = 30;
             
@@ -848,15 +883,15 @@
             localStorage.setItem('verificationCode', code);
             localStorage.setItem('codeTimestamp', Date.now());
             localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', userName);
             
-            // 发送验证码到API
             try {
                 const response = await fetch(EMAIL_API, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         event_type: 'send_email_request',
@@ -893,10 +928,16 @@
         // 提交登录
         submitLogin.addEventListener('click', () => {
             const email = document.getElementById('email').value;
+            const userName = document.getElementById('userName').value;
             const code = document.getElementById('code').value;
             
             if (!email) {
                 loginStatus.textContent = '请输入邮箱地址';
+                return;
+            }
+            
+            if (!userName) {
+                loginStatus.textContent = '请输入姓名';
                 return;
             }
             
@@ -905,7 +946,6 @@
                 return;
             }
             
-            // 验证验证码
             const storedCode = localStorage.getItem('verificationCode');
             const timestamp = localStorage.getItem('codeTimestamp');
             
@@ -916,7 +956,7 @@
             
             // 检查验证码是否在5分钟内
             const currentTime = Date.now();
-            const timeDiff = (currentTime - parseInt(timestamp)) / (1000 * 60); // 分钟
+            const timeDiff = (currentTime - parseInt(timestamp)) / (1000 * 60);
             
             if (timeDiff > 5) {
                 loginStatus.textContent = '验证码已过期';
@@ -926,28 +966,18 @@
             if (code === storedCode) {
                 loginStatus.textContent = '登录成功！';
                 
-                // 更新用户界面
                 setTimeout(() => {
                     loginModal.classList.remove('active');
                     loginBtn.style.display = 'none';
                     userAvatar.style.display = 'flex';
-                    userAvatar.textContent = email.charAt(0).toUpperCase();
+                    userAvatar.textContent = userName.charAt(0).toUpperCase();
                     
-                    // 保存用户信息
                     currentUser = email;
-                    localStorage.setItem('currentUser', email);
-                    
-                    // 检查是否为管理员
                     isAdmin = (email === '3343363350@qq.com');
-                    
-                    // 检查是否为教师
                     isTeacher = isAdmin || email.includes('teacher');
                     
-                    // 更新UI权限
                     updateUIPermissions();
-                    
-                    // 保存用户数据到云存储
-                    saveUserData();
+                    saveUserData(userName);
                 }, 1000);
             } else {
                 loginStatus.textContent = '验证码错误，请重新输入';
@@ -956,10 +986,8 @@
         
         // 更新UI权限
         function updateUIPermissions() {
-            // 显示教师上传区域
             document.getElementById('honorEditSection').style.display = isTeacher ? 'block' : 'none';
             
-            // 更新用户头像样式
             if (isAdmin) {
                 userAvatar.classList.add('admin-avatar');
             } else if (isTeacher) {
@@ -968,11 +996,12 @@
         }
         
         // 保存用户数据到云存储
-        async function saveUserData() {
+        async function saveUserData(userName) {
             if (!currentUser) return;
             
             const userData = {
                 email: currentUser,
+                name: userName,
                 isAdmin: isAdmin,
                 isTeacher: isTeacher,
                 lastLogin: new Date().toISOString()
@@ -983,8 +1012,8 @@
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         message: `Add user data for ${currentUser}`,
@@ -999,15 +1028,12 @@
         // 安全的数据解析函数
         const safeParseData = (content) => {
             try {
-                // 尝试直接解析JSON
                 return JSON.parse(content);
             } catch (e1) {
                 try {
-                    // 尝试Base64解码
                     const decoded = atob(content);
                     return JSON.parse(decoded);
                 } catch (e2) {
-                    // 输出无法解密的JSON内容到控制台
                     console.error('无法解析的数据内容:', content);
                     return null;
                 }
@@ -1017,6 +1043,8 @@
         // 加载学习资料
         async function loadMaterials() {
             const materialsContainer = document.getElementById('materialsContainer');
+            if (!materialsContainer) return;
+            
             materialsContainer.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
             
             try {
@@ -1045,7 +1073,6 @@
                     }
                 });
                 
-                // 获取每个教师的文件
                 for (const teacher of Object.values(teachers)) {
                     try {
                         const teacherResponse = await fetch(`${MATERIALS_PATH}${encodeURIComponent(teacher.name)}`, {
@@ -1067,7 +1094,6 @@
                     }
                 }
                 
-                // 渲染学习资料
                 materialsContainer.innerHTML = '';
                 Object.values(teachers).forEach(teacher => {
                     if (teacher.files.length === 0) return;
@@ -1116,12 +1142,17 @@
                                     method: 'DELETE',
                                     headers: {
                                         'Authorization': `Bearer ${API_KEY}`,
-                                        'Accept': 'application/vnd.github+json'
-                                    }
+                                        'Accept': 'application/vnd.github+json',
+                                        'X-GitHub-Api-Version': '2022-11-28'
+                                    },
+                                    body: JSON.stringify({
+                                        message: `Delete file ${btn.dataset.path.split('/').pop()}`,
+                                        sha: btn.dataset.sha
+                                    })
                                 });
                                 
                                 if (response.ok) {
-                                    loadMaterials(); // 重新加载资料
+                                    loadMaterials();
                                 } else {
                                     alert('删除文件失败');
                                 }
@@ -1141,6 +1172,8 @@
         // 加载帖子
         async function loadPosts() {
             const postList = document.getElementById('postList');
+            if (!postList) return;
+            
             postList.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
             
             try {
@@ -1161,10 +1194,16 @@
                 
                 data.forEach(item => {
                     try {
-                        const postData = safeParseData(item.content);
-                        if (!postData) return;
+                        // 从文件名解析数据
+                        const fileName = item.name;
+                        const dataPart = fileName.split('.')[0];
+                        const base64Decoded = atob(dataPart);
+                        // 修复编码问题
+            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const postData = JSON.parse(decodedStr);
                         
                         const email = postData.email || 'unknown@example.com';
+                        const userName = localStorage.getItem('userName') || email;
                         
                         const postItem = document.createElement('li');
                         postItem.className = 'post-item';
@@ -1172,16 +1211,19 @@
                             <div class="post-header">
                                 <div class="post-author">
                                     <div class="author-avatar ${postData.isAdmin ? 'admin-avatar' : (postData.isTeacher ? 'teacher-avatar' : '')}">
-                                        ${email.charAt(0).toUpperCase()}
+                                        ${userName.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div class="author-name">${email}</div>
+                                        <div class="author-name">${userName}</div>
                                         <div class="post-time">${new Date(postData.timestamp).toLocaleString()}</div>
                                     </div>
                                 </div>
                                 <div class="post-actions">
                                     ${(currentUser === email || isAdmin) ? 
-                                        `<button class="btn btn-danger delete-post-btn" data-id="${postData.id}">
+                                        `<button class="btn btn-danger delete-post-btn" 
+                                            data-id="${postData.id}"
+                                            data-filename="${fileName}"
+                                            data-sha="${item.sha}">
                                             <i class="fas fa-trash"></i>
                                         </button>` : ''}
                                 </div>
@@ -1191,6 +1233,17 @@
                                 <p>${postData.content}</p>
                             </div>
                         `;
+                        
+                        // 如果有图片，显示图片
+                        if (item.size > 0) {
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'image-preview-container';
+                            imgContainer.innerHTML = `
+                                <img src="data:image/png;base64,${item.content}" alt="帖子图片" class="image-preview">
+                            `;
+                            postItem.querySelector('.post-content').appendChild(imgContainer);
+                        }
+                        
                         postList.appendChild(postItem);
                     } catch (e) {
                         console.error('解析帖子错误:', e, item);
@@ -1202,16 +1255,31 @@
                     btn.addEventListener('click', async () => {
                         if (confirm('确定要删除这个帖子吗？')) {
                             try {
-                                const response = await fetch(`${POST_PATH}${btn.dataset.id}`, {
+                                // 直接使用按钮中存储的文件名和SHA值
+                                const fileName = btn.dataset.filename;
+                                const fileSha = btn.dataset.sha;
+                                
+                                if (!fileName || !fileSha) {
+                                    alert('删除失败：缺少必要的文件信息');
+                                    return;
+                                }
+                                
+                                // 执行删除操作
+                                const response = await fetch(`${POST_PATH}${fileName}`, {
                                     method: 'DELETE',
                                     headers: {
                                         'Authorization': `Bearer ${API_KEY}`,
-                                        'Accept': 'application/vnd.github+json'
-                                    }
+                                        'Accept': 'application/vnd.github+json',
+                                        'X-GitHub-Api-Version': '2022-11-28'
+                                    },
+                                    body: JSON.stringify({
+                                        message: `Delete post ${btn.dataset.id}`,
+                                        sha: fileSha
+                                    })
                                 });
                                 
                                 if (response.ok) {
-                                    loadPosts(); // 重新加载帖子
+                                    loadPosts();
                                 } else {
                                     alert('删除帖子失败');
                                 }
@@ -1232,6 +1300,7 @@
         document.getElementById('postSubmitBtn').addEventListener('click', async () => {
             const title = document.getElementById('postTitle').value;
             const content = document.getElementById('postContent').value;
+            const imageInput = document.getElementById('postImage');
             
             if (!title || !content) {
                 alert('请填写标题和内容');
@@ -1253,19 +1322,43 @@
                 timestamp: new Date().toISOString()
             };
             
-            try {
-                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(postData))));
+            // 将数据编码为Base64作为文件名
+            const dataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(postData))));
+            const fileName = `${dataBase64}.json.png`;
+            
+            let fileContent = '';
+            if (imageInput.files.length) {
+                const file = imageInput.files[0];
                 
-                const response = await fetch(`${POST_PATH}${postData.id}.json`, {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('图片大小不能超过5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function() {
+                    fileContent = reader.result.split(',')[1];
+                    uploadPostFile(fileName, fileContent);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadPostFile(fileName, fileContent);
+            }
+        });
+        
+        // 上传帖子文件
+        async function uploadPostFile(fileName, content) {
+            try {
+                const response = await fetch(`${POST_PATH}${fileName}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         message: `New post by ${currentUser}`,
-                        content: encodedContent
+                        content: content
                     })
                 });
                 
@@ -1273,18 +1366,21 @@
                     alert('帖子发布成功');
                     document.getElementById('postTitle').value = '';
                     document.getElementById('postContent').value = '';
-                    loadPosts(); // 重新加载帖子
+                    document.getElementById('postImage').value = '';
+                    loadPosts();
                 } else {
                     alert('帖子发布失败');
                 }
             } catch (error) {
                 console.error('发布帖子错误:', error);
             }
-        });
+        }
         
         // 加载聊天消息
         async function loadChatMessages() {
             const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
             chatMessages.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
             
             try {
@@ -1303,20 +1399,33 @@
                 const data = await response.json();
                 chatMessages.innerHTML = '';
                 
+                if (!Array.isArray(data)) {
+                    chatMessages.innerHTML = '<p class="error-message">聊天数据格式错误</p>';
+                    return;
+                }
+                
                 data.forEach(item => {
                     try {
-                        const messageData = safeParseData(item.content);
-                        if (!messageData) return;
+                        // 从文件名解析数据
+                        const fileName = item.name;
+                        const dataPart = fileName.split('.')[0];
+                        const base64Decoded = atob(dataPart);
+                        // 修复编码问题
+            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const messageData = JSON.parse(decodedStr);
+                        
+                        const userName = localStorage.getItem('userName') || messageData.sender;
                         
                         const messageEl = document.createElement('div');
                         messageEl.className = `message ${messageData.sender === currentUser ? 'current-user-message' : ''}`;
                         messageEl.innerHTML = `
                             <div class="message-header">
-                                <span class="message-sender">${messageData.sender}</span>
+                                <span class="message-sender">${userName}</span>
                                 <span class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</span>
                             </div>
                             <div class="message-content">${messageData.content}</div>
                         `;
+                        
                         chatMessages.appendChild(messageEl);
                     } catch (e) {
                         console.error('解析聊天消息错误:', e, item);
@@ -1335,7 +1444,7 @@
         // 发送消息
         document.getElementById('sendMessageBtn').addEventListener('click', async () => {
             const messageInput = document.getElementById('chatInput');
-            const content = messageInput.value.trim();
+            let content = messageInput.value.trim();
             
             if (!content) {
                 alert('请输入消息内容');
@@ -1347,6 +1456,10 @@
                 return;
             }
             
+            // 修复编码问题
+            // 确保UTF-8编码处理
+            content = content;
+            
             const messageData = {
                 id: Date.now().toString(),
                 sender: currentUser,
@@ -1354,25 +1467,27 @@
                 timestamp: new Date().toISOString()
             };
             
+            // 将数据编码为Base64作为文件名
+            const dataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(messageData))));
+            const fileName = `${dataBase64}.json.png`;
+            
             try {
-                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(messageData))));
-                
-                const response = await fetch(`${CHAT_PATH}${messageData.id}.json`, {
+                const response = await fetch(`${CHAT_PATH}${fileName}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         message: `New chat message from ${currentUser}`,
-                        content: encodedContent
+                        content: '' // 聊天消息没有图片
                     })
                 });
                 
                 if (response.ok) {
                     messageInput.value = '';
-                    loadChatMessages(); // 重新加载消息
+                    loadChatMessages();
                 } else {
                     alert('发送消息失败');
                 }
@@ -1384,6 +1499,8 @@
         // 加载荣誉墙
         async function loadHonors() {
             const honorWall = document.getElementById('honorWall');
+            if (!honorWall) return;
+            
             honorWall.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
             
             try {
@@ -1402,15 +1519,27 @@
                 const data = await response.json();
                 honorWall.innerHTML = '';
                 
+                if (!Array.isArray(data)) {
+                    honorWall.innerHTML = '<p class="error-message">荣誉数据格式错误</p>';
+                    return;
+                }
+                
                 data.forEach(item => {
                     try {
-                        const honorData = safeParseData(item.content);
-                        if (!honorData) return;
+                        // 从文件名解析数据
+                        const fileName = item.name;
+                        const dataPart = fileName.split('.')[0];
+                        const base64Decoded = atob(dataPart);
+                        // 修复编码问题
+            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const honorData = JSON.parse(decodedStr);
                         
                         const honorCard = document.createElement('div');
                         honorCard.className = 'honor-card';
                         honorCard.innerHTML = `
-                            <div class="honor-img" style="background-image: url('${honorData.imageUrl || ''}')"></div>
+                            <div class="honor-img-container">
+                                <div class="honor-img" style="${item.size > 0 ? `background-image: url('data:image/png;base64,${item.content}')` : 'background-color: #f0f3ff'}"></div>
+                            </div>
                             <div class="honor-body">
                                 <h3 class="honor-title">${honorData.title}</h3>
                                 <p class="honor-desc">${honorData.description}</p>
@@ -1423,34 +1552,38 @@
                             </div>
                         `;
                         honorWall.appendChild(honorCard);
+                        
+                        if (isTeacher) {
+                            honorCard.querySelector('.delete-honor-btn').addEventListener('click', async () => {
+                                if (confirm('确定要删除这个荣誉吗？')) {
+                                    try {
+                                        const response = await fetch(item.url, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'Authorization': `Bearer ${API_KEY}`,
+                                                'Accept': 'application/vnd.github+json',
+                                                'X-GitHub-Api-Version': '2022-11-28'
+                                            },
+                                            body: JSON.stringify({
+                                                message: `Delete honor ${item.name}`,
+                                                sha: item.sha
+                                            })
+                                        });
+                                        
+                                        if (response.ok) {
+                                            loadHonors();
+                                        } else {
+                                            alert('删除荣誉失败');
+                                        }
+                                    } catch (error) {
+                                        console.error('删除荣誉错误:', error);
+                                    }
+                                }
+                            });
+                        }
                     } catch (e) {
                         console.error('解析荣誉数据错误:', e, item);
                     }
-                });
-                
-                // 添加删除事件
-                document.querySelectorAll('.delete-honor-btn').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        if (confirm('确定要删除这个荣誉吗？')) {
-                            try {
-                                const response = await fetch(`${HONOR_PATH}${btn.dataset.id}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'Authorization': `Bearer ${API_KEY}`,
-                                        'Accept': 'application/vnd.github+json'
-                                    }
-                                });
-                                
-                                if (response.ok) {
-                                    loadHonors(); // 重新加载荣誉
-                                } else {
-                                    alert('删除荣誉失败');
-                                }
-                            } catch (error) {
-                                console.error('删除荣誉错误:', error);
-                            }
-                        }
-                    });
                 });
                 
             } catch (error) {
@@ -1477,66 +1610,43 @@
                 timestamp: new Date().toISOString()
             };
             
-            // 如果有图片上传
+            // 将数据编码为Base64作为文件名
+            const dataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(honorData))));
+            const fileName = `${dataBase64}.json.png`;
+            
+            let fileContent = '';
             if (imageInput.files.length) {
                 const file = imageInput.files[0];
                 
-                // 检查文件大小
                 if (file.size > 5 * 1024 * 1024) {
                     alert('图片大小不能超过5MB');
                     return;
                 }
                 
-                // 上传图片
                 const reader = new FileReader();
-                reader.onload = async function() {
-                    const content = btoa(unescape(encodeURIComponent(reader.result)));
-                    
-                    try {
-                        const imageResponse = await fetch(`${HONOR_PATH}images/${encodeURIComponent(file.name)}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${API_KEY}`,
-                                'Accept': 'application/vnd.github+json',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                message: `Upload honor image: ${title}`,
-                                content: content
-                            })
-                        });
-                        
-                        if (imageResponse.ok) {
-                            honorData.imageUrl = `${HONOR_PATH}images/${encodeURIComponent(file.name)}`;
-                            saveHonorData(honorData);
-                        } else {
-                            alert('上传图片失败');
-                        }
-                    } catch (error) {
-                        console.error('上传图片错误:', error);
-                    }
+                reader.onload = function() {
+                    fileContent = reader.result.split(',')[1];
+                    uploadHonorFile(fileName, fileContent);
                 };
-                reader.readAsBinaryString(file);
+                reader.readAsDataURL(file);
             } else {
-                saveHonorData(honorData);
+                uploadHonorFile(fileName, fileContent);
             }
         });
         
-        // 保存荣誉数据
-        async function saveHonorData(honorData) {
+        // 上传荣誉文件
+        async function uploadHonorFile(fileName, content) {
             try {
-                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(honorData))));
-                
-                const response = await fetch(`${HONOR_PATH}${honorData.id}.json`, {
+                const response = await fetch(`${HONOR_PATH}${fileName}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
-                        message: `Add honor: ${honorData.title}`,
-                        content: encodedContent
+                        message: `Add honor: ${fileName}`,
+                        content: content
                     })
                 });
                 
@@ -1545,7 +1655,7 @@
                     document.getElementById('honorTitle').value = '';
                     document.getElementById('honorDescription').value = '';
                     document.getElementById('honorImage').value = '';
-                    loadHonors(); // 重新加载荣誉
+                    loadHonors();
                 } else {
                     alert('添加荣誉失败');
                 }
@@ -1556,6 +1666,20 @@
         
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            // 预填充邮箱和姓名
+            const savedEmail = localStorage.getItem('userEmail');
+            const savedUserName = localStorage.getItem('userName');
+            const emailInput = document.getElementById('email');
+            const userNameInput = document.getElementById('userName');
+            
+            if (savedEmail && emailInput) {
+                emailInput.value = savedEmail;
+            }
+            if (savedUserName && userNameInput) {
+                userNameInput.value = savedUserName;
+            }
+            
+            // 加载学习资料
             loadMaterials();
         });
     </script>
