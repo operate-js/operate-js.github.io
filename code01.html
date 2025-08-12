@@ -524,50 +524,9 @@
             text-align: right;
         }
 
-        /* 加载指示器 */
-        .loading-indicator {
-            padding: 30px;
-            text-align: center;
-            color: var(--secondary);
-        }
+        
 
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(78, 115, 223, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 错误提示 */
-        .error-message {
-            padding: 20px;
-            background-color: #fce4e2;
-            border-left: 4px solid var(--danger);
-            margin: 20px 0;
-            color: var(--danger);
-        }
-
-        /* 全局错误提示 */
-        #global-error {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--danger);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 2000;
-            font-weight: 600;
-        }
+        
 
         /* 响应式设计 */
         @media (max-width: 992px) {
@@ -599,7 +558,46 @@
                 width: 95%;
             }
         }
-    </style>
+    .skeleton-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.skeleton-img {
+    height: 150px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+.skeleton-text {
+    height: 12px;
+    background: #f0f0f0;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+.skeleton-list {
+    margin-top: 15px;
+}
+.skeleton-item {
+    height: 50px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+.error-message {
+    color: #e74a3b;
+    padding: 15px;
+    text-align: center;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+</style>
 </head>
 <body>
     <!-- 头部导航 -->
@@ -647,7 +645,37 @@
                 
                 <h2 class="page-title">学习资料</h2>
                 <div id="materialsContainer">
-                    <!-- 学习资料动态加载 -->
+                    <div class="skeleton-list" style="display:none;">
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                    </div>
+                </div>
+                <div id="materialError" class="error-message" style="display:none;"></div>
+                <div id="materialLoading" style="display: none;"></div>
+                <div id="materialUploadSection" style="display: none; margin-top: 20px;">
+                    <h3>上传学习资料</h3>
+                    <div class="form-group">
+                        <label class="form-label">上传文件</label>
+                        <div class="upload-area">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
+                            <p>点击或拖拽文件到此处上传</p>
+                            <input type="file" id="materialFileInput" style="display: none;">
+                        </div>
+                    </div>
+                    <button id="uploadMaterialBtn" class="btn btn-primary">上传</button>
+                </div>
+                <div id="materialUploadSection" style="display: none; margin-top: 20px;">
+                    <h3>上传学习资料</h3>
+                    <div class="form-group">
+                        <label class="form-label">上传文件</label>
+                        <div class="upload-area">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
+                            <p>点击或拖拽文件到此处上传</p>
+                            <input type="file" id="materialFileInput" style="display: none;">
+                        </div>
+                    </div>
+                    <button id="uploadMaterialBtn" class="btn btn-primary">上传</button>
                 </div>
             </div>
 
@@ -692,8 +720,14 @@
             <div id="honorPage" class="page-content">
                 <h2 class="page-title">班级荣誉墙</h2>
                 <div id="honorWall" class="honor-wall">
-                    <!-- 荣誉动态加载 -->
+                    <div class="skeleton-card" style="display:none;">
+                        <div class="skeleton-img"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
                 </div>
+                <div id="honorError" class="error-message" style="display:none;"></div>
+                <div id="honorLoading" style="display: none;"></div>
                 
                 <div id="honorEditSection" style="margin-top: 40px; display: none;">
                     <h3>添加荣誉</h3>
@@ -752,15 +786,6 @@
         // 全局错误处理
         window.addEventListener('error', function(event) {
             console.error('全局错误:', event.error);
-            const errorContainer = document.createElement('div');
-            errorContainer.id = 'global-error';
-            errorContainer.textContent = '发生错误: ' + event.error.message;
-            document.body.prepend(errorContainer);
-            setTimeout(() => {
-                if (document.getElementById('global-error')) {
-                    document.getElementById('global-error').remove();
-                }
-            }, 5000);
         });
 
         // 全局变量
@@ -987,6 +1012,7 @@
         // 更新UI权限
         function updateUIPermissions() {
             document.getElementById('honorEditSection').style.display = isTeacher ? 'block' : 'none';
+            document.getElementById('materialUploadSection').style.display = isTeacher ? 'block' : 'none';
             
             if (isAdmin) {
                 userAvatar.classList.add('admin-avatar');
@@ -1045,7 +1071,13 @@
             const materialsContainer = document.getElementById('materialsContainer');
             if (!materialsContainer) return;
             
-            materialsContainer.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            // 保留现有内容，仅追加新数据
+            const existingFiles = new Set();
+            materialsContainer.querySelectorAll('.material-card').forEach(card => {
+                card.querySelectorAll('li').forEach(li => {
+                    existingFiles.add(li.querySelector('span').textContent);
+                });
+            });
             
             try {
                 const response = await fetch(`${MATERIALS_PATH}?recursive=1`, {
@@ -1055,10 +1087,7 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    materialsContainer.innerHTML = '<p class="error-message">加载学习资料失败</p>';
-                    return;
-                }
+                if (!response.ok) return;
                 
                 const data = await response.json();
                 const teachers = {};
@@ -1123,14 +1152,29 @@
                             </ul>
                         </div>
                     `;
-                    materialsContainer.appendChild(materialCard);
+                    materialsContainer.insertBefore(materialCard, materialsContainer.firstChild);
                 });
                 
                 // 添加下载和删除事件
                 document.querySelectorAll('.download-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const url = btn.dataset.url;
-                        window.open(url, '_blank');
+                        // 直接下载文件
+                        fetch(url)
+                            .then(response => response.blob())
+                            .then(blob => {
+                                const a = document.createElement('a');
+                                a.href = URL.createObjectURL(blob);
+                                a.download = url.split('/').pop();
+                                a.style.display = 'none';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(a.href);
+                            })
+                            .catch(() => {
+                                alert('下载失败，请联系管理员');
+                            });
                     });
                 });
                 
@@ -1164,7 +1208,6 @@
                 });
                 
             } catch (error) {
-                materialsContainer.innerHTML = '<p class="error-message">加载学习资料时出错</p>';
                 console.error('加载学习资料错误:', error);
             }
         }
@@ -1174,23 +1217,21 @@
             const postList = document.getElementById('postList');
             if (!postList) return;
             
-            postList.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
-            
             try {
-                const response = await fetch(POST_PATH, {
+                const response = await fetch(POST_PATH + '?sort=updated&direction=desc', {
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
                         'Accept': 'application/vnd.github+json'
                     }
                 });
                 
-                if (!response.ok) {
-                    postList.innerHTML = '<p class="error-message">加载帖子失败</p>';
-                    return;
-                }
+                if (!response.ok) return;
                 
                 const data = await response.json();
-                postList.innerHTML = '';
+                const existingPostIds = new Set();
+                postList.querySelectorAll('[data-id]').forEach(el => {
+                    existingPostIds.add(el.dataset.id);
+                });
                 
                 data.forEach(item => {
                     try {
@@ -1198,15 +1239,18 @@
                         const fileName = item.name;
                         const dataPart = fileName.split('.')[0];
                         const base64Decoded = atob(dataPart);
-                        // 修复编码问题
-            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const decodedStr = decodeURIComponent(escape(base64Decoded));
                         const postData = JSON.parse(decodedStr);
+                        
+                        // 跳过已存在的帖子
+                        if (existingPostIds.has(postData.id)) return;
                         
                         const email = postData.email || 'unknown@example.com';
                         const userName = localStorage.getItem('userName') || email;
                         
                         const postItem = document.createElement('li');
                         postItem.className = 'post-item';
+                        postItem.dataset.id = postData.id;
                         postItem.innerHTML = `
                             <div class="post-header">
                                 <div class="post-author">
@@ -1238,13 +1282,40 @@
                         if (item.size > 0) {
                             const imgContainer = document.createElement('div');
                             imgContainer.className = 'image-preview-container';
-                            imgContainer.innerHTML = `
-                                <img src="data:image/png;base64,${item.content}" alt="帖子图片" class="image-preview">
-                            `;
+                            imgContainer.style.maxWidth = '100%';
+                            imgContainer.style.overflow = 'hidden';
+                            
+                            // 确保图片内容正确加载
+                            fetch(item.download_url)
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    const reader = new FileReader();
+                                    reader.onload = function() {
+                                        const img = document.createElement('img');
+                                        img.src = reader.result;
+                                        img.alt = '帖子图片';
+                                        img.className = 'image-preview';
+                                        img.style.maxWidth = '100%';
+                                        img.style.height = 'auto';
+                                        img.style.cursor = 'pointer';
+                                        
+                                        // 点击图片时打开原始URL
+                                        img.addEventListener('click', () => {
+                                            window.open(item.download_url, '_blank');
+                                        });
+                                        
+                                        imgContainer.appendChild(img);
+                                    };
+                                    reader.readAsDataURL(blob);
+                                })
+                                .catch(() => {
+                                    console.error('图片加载失败');
+                                });
+                            
                             postItem.querySelector('.post-content').appendChild(imgContainer);
                         }
                         
-                        postList.appendChild(postItem);
+                        postList.insertBefore(postItem, postList.firstChild);
                     } catch (e) {
                         console.error('解析帖子错误:', e, item);
                     }
@@ -1290,9 +1361,13 @@
                     });
                 });
                 
+                // 加载完成后显示帖子列表
+                postLoading.style.display = 'none';
+                postList.style.display = 'block';
+                
             } catch (error) {
-                postList.innerHTML = '<p class="error-message">加载帖子时出错</p>';
                 console.error('加载帖子错误:', error);
+                postLoading.innerHTML = `<p style="color: var(--danger);">加载失败: ${error.message}</p>`;
             }
         }
         
@@ -1376,12 +1451,14 @@
             }
         }
         
-        // 加载聊天消息
+        // 加载聊天消息（智能滚动模式）
         async function loadChatMessages() {
             const chatMessages = document.getElementById('chatMessages');
             if (!chatMessages) return;
             
-            chatMessages.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            // 保存当前滚动位置和高度
+            const scrollBefore = chatMessages.scrollTop;
+            const scrollHeightBefore = chatMessages.scrollHeight;
             
             try {
                 const response = await fetch(CHAT_PATH, {
@@ -1391,33 +1468,37 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    chatMessages.innerHTML = '<p class="error-message">加载聊天记录失败</p>';
-                    return;
-                }
+                if (!response.ok) return;
                 
                 const data = await response.json();
-                chatMessages.innerHTML = '';
+                if (!Array.isArray(data)) return;
                 
-                if (!Array.isArray(data)) {
-                    chatMessages.innerHTML = '<p class="error-message">聊天数据格式错误</p>';
-                    return;
-                }
+                // 获取当前已显示的消息ID
+                const existingMessageIds = new Set();
+                chatMessages.querySelectorAll('.message').forEach(el => {
+                    const id = el.dataset.id;
+                    if (id) existingMessageIds.add(id);
+                });
                 
-                data.forEach(item => {
+                // 只添加新消息
+                let hasNewMessages = false;
+                for (const item of data) {
                     try {
                         // 从文件名解析数据
                         const fileName = item.name;
                         const dataPart = fileName.split('.')[0];
                         const base64Decoded = atob(dataPart);
-                        // 修复编码问题
-            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const decodedStr = decodeURIComponent(escape(base64Decoded));
                         const messageData = JSON.parse(decodedStr);
+                        
+                        // 如果消息已存在则跳过
+                        if (existingMessageIds.has(messageData.id)) continue;
                         
                         const userName = localStorage.getItem('userName') || messageData.sender;
                         
                         const messageEl = document.createElement('div');
                         messageEl.className = `message ${messageData.sender === currentUser ? 'current-user-message' : ''}`;
+                        messageEl.dataset.id = messageData.id;
                         messageEl.innerHTML = `
                             <div class="message-header">
                                 <span class="message-sender">${userName}</span>
@@ -1427,19 +1508,95 @@
                         `;
                         
                         chatMessages.appendChild(messageEl);
+                        hasNewMessages = true;
                     } catch (e) {
                         console.error('解析聊天消息错误:', e, item);
                     }
-                });
+                }
                 
-                // 滚动到底部
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                // 如果有新消息
+                if (hasNewMessages) {
+                    // 计算是否在底部附近（距离底部小于100px）
+                    const isNearBottom = (scrollHeightBefore - scrollBefore - chatMessages.clientHeight) < 100;
+                    
+                    // 如果在底部附近或者这是初始加载，则滚动到底部
+                    if (isNearBottom || scrollHeightBefore === chatMessages.clientHeight) {
+                        scrollChatToBottom();
+                    }
+                }
                 
             } catch (error) {
-                chatMessages.innerHTML = '<p class="error-message">加载聊天记录时出错</p>';
                 console.error('加载聊天记录错误:', error);
             }
         }
+        
+        // 滚动到聊天底部
+        function scrollChatToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                // 使用平滑滚动
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        
+        
+        // 智能聊天滚动控制器
+        function initSmartChatScroll() {
+            // 确保只在聊天界面激活时执行
+            const chatContainer = document.querySelector('.chat-container');
+            if (!chatContainer || window.getComputedStyle(chatContainer).display === 'none') {
+                console.log('[ChatScroll] 聊天界面未激活，跳过初始化');
+                return;
+            }
+            
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) {
+                console.error('[ChatScroll] 错误：未找到聊天区域元素');
+                return;
+            }
+            
+            // 定义滚动执行函数
+            const executeScroll = () => {
+                console.log('[ChatScroll] 执行滚动');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+            
+            // 立即执行一次
+            executeScroll();
+            
+            // 监听内容变化（仅当界面可见时）
+            const observer = new MutationObserver((mutations) => {
+                if (window.getComputedStyle(chatContainer).display !== 'none') {
+                    executeScroll();
+                }
+            });
+            
+            observer.observe(chatMessages, {
+                childList: true,
+                subtree: true
+            });
+            
+            // 暴露控制器方法
+            window.chatScrollController = {
+                refresh: executeScroll,
+                dispose: () => observer.disconnect()
+            };
+        }
+        
+        // 延迟初始化（确保界面切换完成）
+        const initDelayedScroll = () => {
+            setTimeout(initSmartChatScroll, 300);
+        };
+        
+        // 通过事件监听触发（替代直接执行）
+        document.addEventListener('chatActivated', initDelayedScroll);
+        
+        // 开发调试接口
+        window.debugChatScroll = initSmartChatScroll;
         
         // 发送消息
         document.getElementById('sendMessageBtn').addEventListener('click', async () => {
@@ -1488,6 +1645,7 @@
                 if (response.ok) {
                     messageInput.value = '';
                     loadChatMessages();
+                    scrollChatToBottom();
                 } else {
                     alert('发送消息失败');
                 }
@@ -1501,7 +1659,11 @@
             const honorWall = document.getElementById('honorWall');
             if (!honorWall) return;
             
-            honorWall.innerHTML = '<div class="loading-indicator"><div class="spinner"></div> 加载中...</div>';
+            // 保留现有内容，仅追加新数据
+            const existingIds = new Set();
+            honorWall.querySelectorAll('.honor-card').forEach(card => {
+                existingIds.add(card.dataset.id);
+            });
             
             try {
                 const response = await fetch(HONOR_PATH, {
@@ -1511,18 +1673,12 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    honorWall.innerHTML = '<p class="error-message">加载荣誉墙失败</p>';
-                    return;
-                }
+                if (!response.ok) return;
                 
                 const data = await response.json();
                 honorWall.innerHTML = '';
                 
-                if (!Array.isArray(data)) {
-                    honorWall.innerHTML = '<p class="error-message">荣誉数据格式错误</p>';
-                    return;
-                }
+                if (!Array.isArray(data)) return;
                 
                 data.forEach(item => {
                     try {
@@ -1551,7 +1707,7 @@
                                 </button>` : ''}
                             </div>
                         `;
-                        honorWall.appendChild(honorCard);
+                        honorWall.insertBefore(honorCard, honorWall.firstChild);
                         
                         if (isTeacher) {
                             honorCard.querySelector('.delete-honor-btn').addEventListener('click', async () => {
@@ -1587,7 +1743,6 @@
                 });
                 
             } catch (error) {
-                honorWall.innerHTML = '<p class="error-message">加载荣誉墙时出错</p>';
                 console.error('加载荣誉墙错误:', error);
             }
         }
@@ -1679,8 +1834,86 @@
                 userNameInput.value = savedUserName;
             }
             
-            // 加载学习资料
+            // 初始加载数据
             loadMaterials();
+            loadPosts();
+            loadChatMessages();
+            loadHonors();
+            
+            // 初始滚动聊天到底部
+            initChatScroll();
+            
+            // 设置定时器，每5秒静默刷新局部数据（不刷新整个页面）
+            setInterval(() => {
+                try {
+                    
+                    loadMaterials();
+                    loadPosts();
+                    loadChatMessages();
+                    loadHonors();
+                } catch (error) {
+                    console.error('静默刷新失败:', error);
+                }
+            }, 5000);
+            
+            // 绑定上传按钮事件
+            document.getElementById('uploadMaterialBtn')?.addEventListener('click', async () => {
+                const fileInput = document.getElementById('materialFileInput');
+                
+                if (!fileInput || !currentUser) return;
+                
+                const files = fileInput.files;
+                
+                if (files.length === 0) {
+                    alert('请选择文件');
+                    return;
+                }
+                
+                const file = files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('文件大小不能超过5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    const content = reader.result.split(',')[1];
+                    const fileName = file.name;
+                    const filePath = `${MATERIALS_PATH}${encodeURIComponent(currentUser)}/${encodeURIComponent(fileName)}`;
+                    
+                    try {
+                        const response = await fetch(filePath, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${API_KEY}`,
+                                'Accept': 'application/json; charset=utf-8',
+                                'Content-Type': 'application/json; charset=utf-8'
+                            },
+                            body: JSON.stringify({
+                                message: `Upload material: ${fileName}`,
+                                content: content
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            alert('文件上传成功');
+                            fileInput.value = '';
+                            loadMaterials();
+                        } else {
+                            alert('文件上传失败');
+                        }
+                    } catch (error) {
+                        console.error('上传文件错误:', error);
+                        alert('上传文件时出错');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // 点击上传区域触发文件选择
+            document.querySelector('.upload-area')?.addEventListener('click', () => {
+                document.getElementById('materialFileInput').click();
+            });
         });
     </script>
 </body>
