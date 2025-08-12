@@ -1693,9 +1693,6 @@
                         const honorCard = document.createElement('div');
                         honorCard.className = 'honor-card';
                         honorCard.innerHTML = `
-                            <div class="honor-img-container">
-                                <div class="honor-img" style="${item.size > 0 ? `background-image: url('data:image/png;base64,${item.content}')` : 'background-color: #f0f3ff'}"></div>
-                            </div>
                             <div class="honor-body">
                                 <h3 class="honor-title">${honorData.title}</h3>
                                 <p class="honor-desc">${honorData.description}</p>
@@ -1707,6 +1704,43 @@
                                 </button>` : ''}
                             </div>
                         `;
+                        
+                        // 如果有图片，显示图片（与论坛帖子相同的方式）
+                        if (item.size > 0) {
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'image-preview-container';
+                            imgContainer.style.maxWidth = '100%';
+                            imgContainer.style.overflow = 'hidden';
+                            
+                            // 确保图片内容正确加载
+                            fetch(item.download_url)
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    const reader = new FileReader();
+                                    reader.onload = function() {
+                                        const img = document.createElement('img');
+                                        img.src = reader.result;
+                                        img.alt = '荣誉图片';
+                                        img.className = 'image-preview';
+                                        img.style.maxWidth = '100%';
+                                        img.style.height = 'auto';
+                                        img.style.cursor = 'pointer';
+                                        
+                                        // 点击图片时打开原始URL
+                                        img.addEventListener('click', () => {
+                                            window.open(item.download_url, '_blank');
+                                        });
+                                        
+                                        imgContainer.appendChild(img);
+                                    };
+                                    reader.readAsDataURL(blob);
+                                })
+                                .catch(() => {
+                                    console.error('图片加载失败');
+                                });
+                            
+                            honorCard.insertBefore(imgContainer, honorCard.firstChild);
+                        }
                         honorWall.insertBefore(honorCard, honorWall.firstChild);
                         
                         if (isTeacher) {
@@ -1812,10 +1846,12 @@
                     document.getElementById('honorImage').value = '';
                     loadHonors();
                 } else {
-                    alert('添加荣誉失败');
+                    const errorData = await response.json();
+                    alert(`添加荣誉失败: ${errorData.message || response.status}`);
                 }
             } catch (error) {
                 console.error('添加荣誉错误:', error);
+                alert(`添加荣誉时出错: ${error.message}`);
             }
         }
         
