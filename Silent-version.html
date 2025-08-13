@@ -1054,6 +1054,9 @@
                     name: userName
                 };
                 
+                // 对数据进行 Base64 加密
+                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(userSetData))));
+                
                 await fetch(`${USER_SET_PATH}${encodeURIComponent(currentUser)}/用户数据.json`, {
                     method: 'PUT',
                     headers: {
@@ -1063,7 +1066,7 @@
                     },
                     body: JSON.stringify({
                         message: `Update user name for ${currentUser}`,
-                        content: btoa(unescape(encodeURIComponent(JSON.stringify(userSetData))))
+                        content: encodedContent
                     })
                 });
             } catch (error) {
@@ -1114,9 +1117,16 @@
                             
                             if (userResponse.ok) {
                                 const userData = await userResponse.json();
-                                const decodedContent = atob(userData.content);
-                                const parsedData = JSON.parse(decodedContent);
-                                userNamesCache[userFolder.name] = parsedData.name;
+                                try {
+                                    // 尝试直接解析 JSON（如果未加密）
+                                    const parsedData = JSON.parse(userData.content);
+                                    userNamesCache[userFolder.name] = parsedData.name;
+                                } catch (e) {
+                                    // 如果解析失败，尝试 Base64 解码
+                                    const decodedContent = atob(userData.content);
+                                    const parsedData = JSON.parse(decodedContent);
+                                    userNamesCache[userFolder.name] = parsedData.name;
+                                }
                             }
                         } catch (error) {
                             console.error(`加载用户 ${userFolder.name} 数据失败:`, error);
