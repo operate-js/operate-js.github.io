@@ -790,6 +790,7 @@
 
         // 全局变量
         const USER_DATA_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Forum/User%20Data/";
+        const USER_SET_PATH = "https://api.github.com/repos/operate-js/text-3/contents/User-set/";
         const CHAT_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Chat%20room/";
         const POST_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Post/";
         const TEACHER_PATH = "https://api.github.com/repos/operate-js/text-3/contents/root/Teacher%20List/";
@@ -1034,6 +1035,7 @@
             };
             
             try {
+                // 保存到论坛用户数据
                 await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
                     method: 'PUT',
                     headers: {
@@ -1044,6 +1046,24 @@
                     body: JSON.stringify({
                         message: `Add user data for ${currentUser}`,
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(userData))))
+                    })
+                });
+                
+                // 保存到用户设置
+                const userSetData = {
+                    name: userName
+                };
+                
+                await fetch(`${USER_SET_PATH}${encodeURIComponent(currentUser)}/用户数据.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/json; charset=utf-8',
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        message: `Update user name for ${currentUser}`,
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(userSetData))))
                     })
                 });
             } catch (error) {
@@ -1065,6 +1085,48 @@
                 }
             }
         };
+        
+        // 获取所有用户数据
+        let userNamesCache = {};
+        async function loadAllUserNames() {
+            try {
+                const response = await fetch(USER_SET_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                if (!Array.isArray(data)) return;
+                
+                for (const userFolder of data) {
+                    if (userFolder.type === 'dir') {
+                        try {
+                            const userResponse = await fetch(`${USER_SET_PATH}${encodeURIComponent(userFolder.name)}/用户数据.json`, {
+                                headers: {
+                                    'Authorization': `Bearer ${API_KEY}`,
+                                    'Accept': 'application/vnd.github+json'
+                                }
+                            });
+                            
+                            if (userResponse.ok) {
+                                const userData = await userResponse.json();
+                                const decodedContent = atob(userData.content);
+                                const parsedData = JSON.parse(decodedContent);
+                                userNamesCache[userFolder.name] = parsedData.name;
+                            }
+                        } catch (error) {
+                            console.error(`加载用户 ${userFolder.name} 数据失败:`, error);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+            }
+        }
         
         // 加载学习资料
         async function loadMaterials() {
@@ -1246,7 +1308,7 @@
                         if (existingPostIds.has(postData.id)) return;
                         
                         const email = postData.email || 'unknown@example.com';
-                        const userName = localStorage.getItem('userName') || email;
+                        const userName = userNamesCache[email] || localStorage.getItem('userName') || email;
                         
                         const postItem = document.createElement('li');
                         postItem.className = 'post-item';
@@ -1871,10 +1933,12 @@
             }
             
             // 初始加载数据
-            loadMaterials();
-            loadPosts();
-            loadChatMessages();
-            loadHonors();
+            loadAllUserNames().then(() => {
+                loadMaterials();
+                loadPosts();
+                loadChatMessages();
+                loadHonors();
+            });
             
             // 初始滚动聊天到底部
             initChatScroll();
@@ -1882,11 +1946,12 @@
             // 设置定时器，每5秒静默刷新局部数据（不刷新整个页面）
             setInterval(() => {
                 try {
-                    
-                    loadMaterials();
-                    loadPosts();
-                    loadChatMessages();
-                    loadHonors();
+                    loadAllUserNames().then(() => {
+                        loadMaterials();
+                        loadPosts();
+                        loadChatMessages();
+                        loadHonors();
+                    });
                 } catch (error) {
                     console.error('静默刷新失败:', error);
                 }
