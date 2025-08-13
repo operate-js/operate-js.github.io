@@ -1058,6 +1058,12 @@
                 const jsonString = JSON.stringify(userSetData);
                 const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
                 
+                // 创建包含加密内容的请求体
+                const requestBody = {
+                    message: `Update user name for ${currentUser}`,
+                    content: encodedContent
+                };
+                
                 await fetch(`${USER_SET_PATH}${encodeURIComponent(currentUser)}/用户数据.json`, {
                     method: 'PUT',
                     headers: {
@@ -1065,10 +1071,7 @@
                         'Accept': 'application/json; charset=utf-8',
                         'Content-Type': 'application/json; charset=utf-8'
                     },
-                    body: JSON.stringify({
-                        message: `Update user name for ${currentUser}`,
-                        content: encodedContent
-                    })
+                    body: JSON.stringify(requestBody)
                 });
             } catch (error) {
                 console.error('保存用户数据失败:', error);
