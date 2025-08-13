@@ -612,6 +612,24 @@
     <span id="avatarInitial">U</span>
     <input type="file" id="avatarUpload" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1000;">
 </div>
+<!-- 图片裁剪模态框 -->
+<div id="cropModal" class="modal" style="display: none; z-index: 9999;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">裁剪头像</h3>
+            <span class="close-modal" id="closeCropModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div style="text-align: center;">
+                <canvas id="cropCanvas" style="max-width: 100%; border: 1px solid #ddd;"></canvas>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button id="cropBtn" class="btn btn-primary">确认裁剪</button>
+                <button id="cancelCropBtn" class="btn btn-danger" style="margin-left: 10px;">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function initAvatarUpload() {
         const avatar = document.getElementById('userAvatar');
@@ -630,8 +648,17 @@
             uploadInput.click();
         };
         
-        // 处理文件选择变化
-        uploadInput.addEventListener('change', async function(e) {
+        console.log('验证上传输入框是否存在:', !!uploadInput);
+            // 移除可能存在的重复事件监听器
+            uploadInput.removeEventListener('change', arguments.callee);
+            // 确保事件只绑定一次并完全阻止默认行为
+            if (window.__fileUploadListenerBound) return;
+            window.__fileUploadListenerBound = true;
+            uploadInput.addEventListener('change', async function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('文件选择事件触发，已阻止默认行为和事件冒泡');
+
             const file = e.target.files[0];
             if (!file) return;
             
@@ -650,30 +677,6 @@
                         avatar.style.background = `center/cover no-repeat url(${event.target.result})`;
                         avatar.style.backgroundSize = 'cover';
                         avatar.textContent = ''; // 确保没有残留文本
-                    }
-                    
-                    // 更新用户数据到GitHub
-                    if (currentUser) {
-                        try {
-                            // 先尝试获取现有文件的sha
-                            const existingData = await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
-                                headers: {
-                                    'Authorization': `Bearer ${API_KEY}`,
-                                    'Accept': 'application/vnd.github+json'
-                                }
-                            });
-                            
-                            let sha = null;
-                            if (existingData.ok) {
-                                const existingContent = await existingData.json();
-                                sha = existingContent.sha;
-                            }
-                            
-                            await saveUserData(localStorage.getItem('userName') || currentUser, sha);
-                            console.log('用户数据更新成功');
-                        } catch (error) {
-                            console.error('更新用户数据失败:', error);
-                        }
                     }
                 } catch (e) {
                     console.error('图片处理错误:', e);
@@ -966,7 +969,10 @@
                         loadPosts();
                         break;
                     case 'chatPage':
-                        loadChatMessages();
+                        loadChatMessages().then(() => {
+                            // 确保聊天区加载完成后再滚动
+                            scrollChatToBottom();
+                        });
                         break;
                     case 'honorPage':
                         loadHonors();
@@ -2113,59 +2119,141 @@
             }
         }
         
-        // 头像上传处理
+        // 头像上传处理（优化版）
         document.getElementById('avatarUpload')?.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            if (!file.type.startsWith('image/')) {
-                alert('请选择图片文件');
+            // 更严格的图片类型验证
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validImageTypes.includes(file.type)) {
+                alert('请选择有效的图片格式（JPEG, PNG, GIF, WEBP）');
+                e.target.value = ''; // 清空文件选择
                 return;
             }
             
-            if (file.size > 2 * 1024 * 1024) {
-                alert('图片大小不能超过2MB');
+            // 文件大小限制（2MB）
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                alert(`图片大小不能超过${maxSize / (1024 * 1024)}MB`);
+                e.target.value = '';
                 return;
             }
             
             try {
-                const avatarUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = function() {
-                            // 创建缩略图
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            const size = Math.min(img.width, img.height);
-                            canvas.width = 40;
-                            canvas.height = 40;
-                            ctx.drawImage(img, 0, 0, size, size, 0, 0, 40, 40);
-                            
-                            resolve(canvas.toDataURL('image/png'));
-                        };
-                        img.onerror = reject;
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-                
-                localStorage.setItem('userAvatar', avatarUrl);
-                
-                // 更新头像显示
-                document.getElementById('avatarInitial').style.display = 'none';
-                document.getElementById('userAvatar').style.backgroundImage = `url(${avatarUrl})`;
-                document.getElementById('userAvatar').style.backgroundSize = 'cover';
-                
-                // 更新用户数据
-                if (currentUser) {
-                    await saveUserData(localStorage.getItem('userName') || currentUser);
+                // 显示加载状态
+                const avatarElement = document.getElementById('userAvatar');
+                if (avatarElement) {
+                    avatarElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 }
+                
+                // 读取文件并显示裁剪界面
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById('cropCanvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 设置画布大小
+                        const maxSize = 400;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height *= maxSize / width;
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width *= maxSize / height;
+                                height = maxSize;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        console.log('准备显示裁剪模态框');
+                        const modal = document.getElementById('cropModal');
+                        modal.style.display = 'flex';
+                        modal.style.opacity = '1';
+                        modal.style.visibility = 'visible';
+                        console.log('模态框强制显示状态:', {
+                            display: modal.style.display,
+                            opacity: modal.style.opacity,
+                            visibility: modal.style.visibility
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             } catch (error) {
                 console.error('头像上传处理失败:', error);
-                alert('头像处理失败，请重试');
+                alert(`头像上传失败: ${error.message}`);
+                e.target.value = ''; // 清空文件选择
             }
+        });
+        
+        // 关闭裁剪模态框
+        document.getElementById('closeCropModal')?.addEventListener('click', function() {
+            document.getElementById('cropModal').style.display = 'none';
+            document.getElementById('avatarUpload').value = '';
+        });
+        
+        document.getElementById('cancelCropBtn')?.addEventListener('click', function() {
+            document.getElementById('cropModal').style.display = 'none';
+            document.getElementById('avatarUpload').value = '';
+        });
+        
+        // 确认裁剪
+        document.getElementById('cropBtn')?.addEventListener('click', async function() {
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 获取裁剪区域（这里简化处理，实际可以使用更复杂的裁剪逻辑）
+            const size = Math.min(canvas.width, canvas.height);
+            const offsetX = (canvas.width - size) / 2;
+            const offsetY = (canvas.height - size) / 2;
+            
+            // 创建裁剪后的画布
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = 40;
+            croppedCanvas.height = 40;
+            const croppedCtx = croppedCanvas.getContext('2d');
+            croppedCtx.drawImage(canvas, offsetX, offsetY, size, size, 0, 0, 40, 40);
+            
+            const avatarUrl = croppedCanvas.toDataURL('image/png', 0.9);
+            
+            // 存储头像数据
+            localStorage.setItem('userAvatar', avatarUrl);
+            
+            // 更新头像显示
+            const avatarInitial = document.getElementById('avatarInitial');
+            if (avatarInitial) {
+                avatarInitial.remove();
+            }
+            
+            const avatar = document.getElementById('userAvatar');
+            if (avatar) {
+                avatar.style.backgroundImage = `url(${avatarUrl})`;
+                avatar.style.backgroundSize = 'cover';
+                avatar.innerHTML = ''; // 清除加载状态
+            }
+            
+            // 更新用户数据到服务器
+            if (currentUser) {
+                try {
+                    await saveUserData(localStorage.getItem('userName') || currentUser);
+                } catch (error) {
+                    console.error('用户数据更新失败:', error);
+                }
+            }
+            
+            // 关闭裁剪模态框
+            document.getElementById('cropModal').style.display = 'none';
         });
         
         // 初始化
@@ -2197,8 +2285,10 @@
             loadChatMessages();
             loadHonors();
             
-            // 初始滚动聊天到底部
-            initChatScroll();
+            // 页面切换时初始化滚动
+            if (document.getElementById('chatPage').classList.contains('active')) {
+                initChatScroll();
+            }
             
             // 设置定时器，每5秒静默刷新局部数据（不刷新整个页面）
             setInterval(() => {
