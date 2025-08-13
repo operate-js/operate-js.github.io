@@ -1258,7 +1258,7 @@
                                         ${userName.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div class="author-name">${userName}</div>
+                                        <div class="author-name">${postData.name || userName}</div>
                                         <div class="post-time">${new Date(postData.timestamp).toLocaleString()}</div>
                                     </div>
                                 </div>
@@ -1389,12 +1389,13 @@
             
             const postData = {
                 id: Date.now().toString(),
-                title: localStorage.getItem('userName') || currentUser,
+                title: title,
                 content: content,
                 email: currentUser,
                 isAdmin: isAdmin,
                 isTeacher: isTeacher,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                name: localStorage.getItem('userName') || currentUser
             };
             
             // 将数据编码为Base64作为文件名
