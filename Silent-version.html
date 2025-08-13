@@ -608,7 +608,121 @@
         </div>
         <div class="user-controls">
             <button id="loginBtn" class="btn btn-primary">登录</button>
-            <div id="userAvatar" class="user-avatar" style="display: none;">U</div>
+            <div id="userAvatar" class="user-avatar" style="display: none; position: relative; cursor: pointer; overflow: hidden;">
+    <span id="avatarInitial">U</span>
+    <input type="file" id="avatarUpload" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1000;">
+</div>
+<script>
+    function initAvatarUpload() {
+        const avatar = document.getElementById('userAvatar');
+        const uploadInput = document.getElementById('avatarUpload');
+        const avatarInitial = document.getElementById('avatarInitial');
+        
+        if (!avatar || !uploadInput) return;
+        
+        // 确保文件输入框在DOM中
+        if (!document.body.contains(uploadInput)) {
+            avatar.appendChild(uploadInput);
+        }
+        
+        avatar.onclick = function() {
+            console.log('触发文件选择');
+            uploadInput.click();
+        };
+        
+        // 处理文件选择变化
+        uploadInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const avatarInitial = document.getElementById('avatarInitial');
+                    const avatar = document.getElementById('userAvatar');
+                    
+                    // 安全更新头像显示 - 完全移除首字母并确保无文本内容
+                    if (avatarInitial && avatarInitial.parentNode) {
+                        avatarInitial.remove(); // 完全移除DOM元素
+                    }
+                    if (avatar) {
+                        avatar.style.background = `center/cover no-repeat url(${event.target.result})`;
+                        avatar.style.backgroundSize = 'cover';
+                        avatar.textContent = ''; // 确保没有残留文本
+                    }
+                    
+                    // 更新用户数据到GitHub
+                    if (currentUser) {
+                        try {
+                            // 先尝试获取现有文件的sha
+                            const existingData = await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
+                                headers: {
+                                    'Authorization': `Bearer ${API_KEY}`,
+                                    'Accept': 'application/vnd.github+json'
+                                }
+                            });
+                            
+                            let sha = null;
+                            if (existingData.ok) {
+                                const existingContent = await existingData.json();
+                                sha = existingContent.sha;
+                            }
+                            
+                            await saveUserData(localStorage.getItem('userName') || currentUser, sha);
+                            console.log('用户数据更新成功');
+                        } catch (error) {
+                            console.error('更新用户数据失败:', error);
+                        }
+                    }
+                } catch (e) {
+                    console.error('图片处理错误:', e);
+                }
+            };
+            reader.onerror = function() {
+                console.error('文件读取失败');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // 上传到云端的函数
+    function uploadToCloud(file) {
+        if (!file) {
+            console.warn('没有可上传的文件');
+            return;
+        }
+        
+        // 实际项目中替换为您的真实API地址
+        const apiUrl = 'https://your-real-api.com/upload-avatar';
+        
+        console.log('准备上传到:', apiUrl);
+        // 实际部署时取消注释下面代码
+        /*
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        fetch(apiUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('上传成功:', data);
+        })
+        .catch(error => {
+            console.error('上传失败:', error);
+        });
+        */
+    }
+    
+    // 确保在DOM加载完成后初始化
+    if (document.readyState === 'complete') {
+        initAvatarUpload();
+    } else {
+        window.addEventListener('DOMContentLoaded', initAvatarUpload);
+    }
+</script>
         </div>
     </header>
 
@@ -739,10 +853,15 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">荣誉图片</label>
-                        <div class="upload-area">
+                        <div class="upload-area" id="honorUploadArea">
                             <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
                             <p>点击或拖拽文件到此处上传</p>
-                            <input type="file" id="honorImage" style="display: none;">
+                            <input type="file" id="honorImage" accept="image/*,.svg" style="display: none;">
+                            <div id="honorFileInfo" style="margin-top: 10px; display: none;">
+                                <p>文件名: <span id="honorFileName"></span></p>
+                                <p>文件大小: <span id="honorFileSize"></span></p>
+                                <p>文件类型: <span id="honorFileType"></span></p>
+                            </div>
                         </div>
                     </div>
                     <button id="addHonorBtn" class="btn btn-primary">添加荣誉</button>
@@ -795,8 +914,12 @@
         const TEACHER_PATH = "https://api.github.com/repos/operate-js/text-3/contents/root/Teacher%20List/";
         const HONOR_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Wall%20of%20Fame/";
         const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
-        
         const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
+        
+        // 初始化用户头像存储
+        if (!localStorage.getItem('userAvatars')) {
+            localStorage.setItem('userAvatars', JSON.stringify({}));
+        }
         
         // 解密5次的密钥
         const decryptBase64 = (str, times) => {
@@ -859,8 +982,16 @@
             // 预填充邮箱和姓名
             const savedEmail = localStorage.getItem('userEmail');
             const savedUserName = localStorage.getItem('userName');
+            const savedAvatar = localStorage.getItem('userAvatar');
             const emailInput = document.getElementById('email');
             const userNameInput = document.getElementById('userName');
+            
+            // 加载用户头像
+            if (savedAvatar) {
+                document.getElementById('avatarInitial').style.display = 'none';
+                document.getElementById('userAvatar').style.backgroundImage = `url(${savedAvatar})`;
+                document.getElementById('userAvatar').style.backgroundSize = 'cover';
+            }
             
             if (savedEmail && emailInput) {
                 emailInput.value = savedEmail;
@@ -995,7 +1126,13 @@
                     loginModal.classList.remove('active');
                     loginBtn.style.display = 'none';
                     userAvatar.style.display = 'flex';
-                    userAvatar.textContent = userName.charAt(0).toUpperCase();
+                    
+                    // 确保没有文字内容
+                    const avatarInitial = document.getElementById('avatarInitial');
+                    if (avatarInitial) {
+                        avatarInitial.remove();
+                    }
+                    userAvatar.textContent = '';
                     
                     currentUser = email;
                     isAdmin = (email === '3343363350@qq.com');
@@ -1022,32 +1159,54 @@
         }
         
         // 保存用户数据到云存储
-        async function saveUserData(userName) {
-            if (!currentUser) return;
+        async function saveUserData(userName, sha = null) {
+            if (!currentUser) {
+                console.warn('未登录用户，跳过保存');
+                return;
+            }
             
             const userData = {
                 email: currentUser,
                 name: userName,
                 isAdmin: isAdmin,
                 isTeacher: isTeacher,
-                lastLogin: new Date().toISOString()
+                lastLogin: new Date().toISOString(),
+                avatar: localStorage.getItem('userAvatar') || ""
             };
             
+            console.log('准备保存用户数据:', userData);
+            
             try {
-                await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
+                const payload = {
+                    message: `Update user data for ${currentUser}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(userData))))
+                };
+                
+                // 如果提供了sha值，添加到payload中
+                if (sha) {
+                    payload.sha = sha;
+                }
+                
+                const response = await fetch(`${USER_DATA_PATH}${encodeURIComponent(currentUser)}.json`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`,
                         'Accept': 'application/json; charset=utf-8',
                         'Content-Type': 'application/json; charset=utf-8'
                     },
-                    body: JSON.stringify({
-                        message: `Add user data for ${currentUser}`,
-                        content: btoa(unescape(encodeURIComponent(JSON.stringify(userData))))
-                    })
+                    body: JSON.stringify(payload)
                 });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API返回错误: ${errorData.message || response.status}`);
+                }
+                
+                console.log('用户数据保存成功');
+                return true;
             } catch (error) {
                 console.error('保存用户数据失败:', error);
+                throw error; // 重新抛出错误以便外部捕获
             }
         }
         
@@ -1065,6 +1224,38 @@
                 }
             }
         };
+        
+        // 获取用户头像
+        function getUserAvatar(email, fallbackText) {
+            if (!email) return fallbackText;
+            
+            try {
+                // 直接获取头像URL，不解析为JSON
+                const avatarUrl = localStorage.getItem('userAvatar');
+                if (avatarUrl && (email === currentUser || email === localStorage.getItem('userEmail'))) {
+                    return `<img src="${avatarUrl}" alt="用户头像" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                }
+                
+                // 检查旧版存储方式
+                const avatars = localStorage.getItem('userAvatars');
+                if (avatars) {
+                    try {
+                        const parsedAvatars = JSON.parse(avatars);
+                        if (parsedAvatars && parsedAvatars[email]) {
+                            return `<img src="${parsedAvatars[email]}" alt="用户头像" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                        }
+                    } catch (e) {
+                        console.log('非JSON格式的头像数据，直接使用');
+                        if (avatars[email]) {
+                            return `<img src="${avatars[email]}" alt="用户头像" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('获取头像数据错误:', e);
+            }
+            return fallbackText;
+        }
         
         // 加载学习资料
         async function loadMaterials() {
@@ -1255,7 +1446,7 @@
                             <div class="post-header">
                                 <div class="post-author">
                                     <div class="author-avatar ${postData.isAdmin ? 'admin-avatar' : (postData.isTeacher ? 'teacher-avatar' : '')}">
-                                        ${userName.charAt(0).toUpperCase()}
+                                        ${getUserAvatar(postData.email, (postData.name || userName).charAt(0).toUpperCase())}
                                     </div>
                                     <div>
                                         <div class="author-name">${postData.name || userName}</div>
@@ -1502,7 +1693,7 @@
                         messageEl.dataset.id = messageData.id;
                         messageEl.innerHTML = `
                             <div class="message-header">
-                                <span class="message-sender">${userName}</span>
+                                <span class="message-sender">${messageData.name || messageData.sender || userName}</span>
                                 <span class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</span>
                             </div>
                             <div class="message-content">${messageData.content}</div>
@@ -1614,7 +1805,6 @@
                 return;
             }
             
-            // 修复编码问题
             // 确保UTF-8编码处理
             content = content;
             
@@ -1622,7 +1812,8 @@
                 id: Date.now().toString(),
                 sender: currentUser,
                 content: content,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                name: localStorage.getItem('userName') || currentUser
             };
             
             // 将数据编码为Base64作为文件名
@@ -1714,31 +1905,56 @@
                             imgContainer.style.overflow = 'hidden';
                             
                             // 确保图片内容正确加载
-                            fetch(item.download_url)
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    const reader = new FileReader();
-                                    reader.onload = function() {
-                                        const img = document.createElement('img');
-                                        img.src = reader.result;
-                                        img.alt = '荣誉图片';
-                                        img.className = 'image-preview';
-                                        img.style.maxWidth = '100%';
-                                        img.style.height = 'auto';
-                                        img.style.cursor = 'pointer';
+                            if (item.name.toLowerCase().endsWith('.svg')) {
+                                // 对于SVG文件，直接使用fetch获取内容
+                                fetch(item.download_url)
+                                    .then(response => response.text())
+                                    .then(svgContent => {
+                                        // 创建div容器来显示SVG
+                                        const svgContainer = document.createElement('div');
+                                        svgContainer.innerHTML = svgContent;
+                                        svgContainer.style.maxWidth = '100%';
+                                        svgContainer.style.height = 'auto';
+                                        svgContainer.style.cursor = 'pointer';
                                         
-                                        // 点击图片时打开原始URL
-                                        img.addEventListener('click', () => {
+                                        // 点击时打开原始URL
+                                        svgContainer.addEventListener('click', () => {
                                             window.open(item.download_url, '_blank');
                                         });
                                         
-                                        imgContainer.appendChild(img);
-                                    };
-                                    reader.readAsDataURL(blob);
-                                })
-                                .catch(() => {
-                                    console.error('图片加载失败');
-                                });
+                                        imgContainer.appendChild(svgContainer);
+                                    })
+                                    .catch(() => {
+                                        console.error('SVG加载失败');
+                                    });
+                            } else {
+                                // 处理非SVG图片
+                                fetch(item.download_url)
+                                    .then(response => response.blob())
+                                    .then(blob => {
+                                        const reader = new FileReader();
+                                        reader.onload = function() {
+                                            const img = document.createElement('img');
+                                            img.src = reader.result;
+                                            img.alt = '荣誉图片';
+                                            img.className = 'image-preview';
+                                            img.style.maxWidth = '100%';
+                                            img.style.height = 'auto';
+                                            img.style.cursor = 'pointer';
+                                            
+                                            // 点击图片时打开原始URL
+                                            img.addEventListener('click', () => {
+                                                window.open(item.download_url, '_blank');
+                                            });
+                                            
+                                            imgContainer.appendChild(img);
+                                        };
+                                        reader.readAsDataURL(blob);
+                                    })
+                                    .catch(() => {
+                                        console.error('图片加载失败');
+                                    });
+                            }
                             
                             honorCard.insertBefore(imgContainer, honorCard.firstChild);
                         }
@@ -1780,6 +1996,47 @@
             } catch (error) {
                 console.error('加载荣誉墙错误:', error);
             }
+        }
+        
+        // 荣誉图片文件选择处理
+        document.getElementById('honorImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 验证文件类型
+            const isImage = file.type.startsWith('image/');
+            const isSVG = file.name.toLowerCase().endsWith('.svg');
+            
+            if (!isImage && !isSVG) {
+                alert('请选择图片文件（支持格式：jpg, png, gif, svg等）');
+                e.target.value = '';
+                return;
+            }
+            
+            const fileInfo = document.getElementById('honorFileInfo');
+            const fileName = document.getElementById('honorFileName');
+            const fileSize = document.getElementById('honorFileSize');
+            const fileType = document.getElementById('honorFileType');
+            
+            // 显示文件信息
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileType.textContent = file.type || '未知类型';
+            fileInfo.style.display = 'block';
+        });
+        
+        // 点击上传区域触发文件选择
+        document.getElementById('honorUploadArea').addEventListener('click', function() {
+            document.getElementById('honorImage').click();
+        });
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
         // 添加荣誉
@@ -1856,13 +2113,76 @@
             }
         }
         
+        // 头像上传处理
+        document.getElementById('avatarUpload')?.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件');
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('图片大小不能超过2MB');
+                return;
+            }
+            
+            try {
+                const avatarUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // 创建缩略图
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            const size = Math.min(img.width, img.height);
+                            canvas.width = 40;
+                            canvas.height = 40;
+                            ctx.drawImage(img, 0, 0, size, size, 0, 0, 40, 40);
+                            
+                            resolve(canvas.toDataURL('image/png'));
+                        };
+                        img.onerror = reject;
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+                
+                localStorage.setItem('userAvatar', avatarUrl);
+                
+                // 更新头像显示
+                document.getElementById('avatarInitial').style.display = 'none';
+                document.getElementById('userAvatar').style.backgroundImage = `url(${avatarUrl})`;
+                document.getElementById('userAvatar').style.backgroundSize = 'cover';
+                
+                // 更新用户数据
+                if (currentUser) {
+                    await saveUserData(localStorage.getItem('userName') || currentUser);
+                }
+            } catch (error) {
+                console.error('头像上传处理失败:', error);
+                alert('头像处理失败，请重试');
+            }
+        });
+        
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 预填充邮箱和姓名
             const savedEmail = localStorage.getItem('userEmail');
             const savedUserName = localStorage.getItem('userName');
+            const savedAvatar = localStorage.getItem('userAvatar');
             const emailInput = document.getElementById('email');
             const userNameInput = document.getElementById('userName');
+            
+            // 加载用户头像
+            if (savedAvatar) {
+                document.getElementById('avatarInitial').style.display = 'none';
+                document.getElementById('userAvatar').style.backgroundImage = `url(${savedAvatar})`;
+                document.getElementById('userAvatar').style.backgroundSize = 'cover';
+            }
             
             if (savedEmail && emailInput) {
                 emailInput.value = savedEmail;
