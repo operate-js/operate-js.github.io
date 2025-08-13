@@ -1055,7 +1055,8 @@
                 };
                 
                 // 对数据进行 Base64 加密
-                const encodedContent = btoa(unescape(encodeURIComponent(JSON.stringify(userSetData))));
+                const jsonString = JSON.stringify(userSetData);
+                const encodedContent = btoa(unescape(encodeURIComponent(jsonString)));
                 
                 await fetch(`${USER_SET_PATH}${encodeURIComponent(currentUser)}/用户数据.json`, {
                     method: 'PUT',
