@@ -789,7 +789,7 @@
         });
 
         // 全局变量
-        const USER_DATA_PATH = "https://api.github.com/repos/operate-js/text-3/contents/User-set/";
+        const USER_DATA_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Forum/User%20Data/";
         const CHAT_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Chat%20room/";
         const POST_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Post/";
         const TEACHER_PATH = "https://api.github.com/repos/operate-js/text-3/contents/root/Teacher%20List/";
@@ -1003,7 +1003,6 @@
                     
                     updateUIPermissions();
                     saveUserData(userName);
-                fetchAllUserData();
                 }, 1000);
             } else {
                 loginStatus.textContent = '验证码错误，请重新输入';
@@ -1023,47 +1022,6 @@
         }
         
         // 保存用户数据到云存储
-        async function fetchAllUserData() {
-            try {
-                const response = await fetch(USER_DATA_PATH, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json'
-                    }
-                });
-                
-                if (!response.ok) return;
-                
-                const data = await response.json();
-                if (!Array.isArray(data)) return;
-                
-                const userDataMap = {};
-                
-                for (const item of data) {
-                    try {
-                        const fileResponse = await fetch(item.url, {
-                            headers: {
-                                'Authorization': `Bearer ${API_KEY}`,
-                                'Accept': 'application/vnd.github+json'
-                            }
-                        });
-                        
-                        if (fileResponse.ok) {
-                            const fileData = await fileResponse.json();
-                            const content = atob(fileData.content);
-                            const userData = JSON.parse(content);
-                            userDataMap[userData.email] = userData.name;
-                        }
-                    } catch (error) {
-                        console.error('加载用户数据错误:', error);
-                    }
-                }
-                
-                localStorage.setItem('userDataMap', JSON.stringify(userDataMap));
-            } catch (error) {
-                console.error('获取用户数据错误:', error);
-            }
-        }
         async function saveUserData(userName) {
             if (!currentUser) return;
             
@@ -1431,7 +1389,7 @@
             
             const postData = {
                 id: Date.now().toString(),
-                title: title,
+                title: localStorage.getItem('userName') || currentUser,
                 content: content,
                 email: currentUser,
                 isAdmin: isAdmin,
