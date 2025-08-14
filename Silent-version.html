@@ -10,6 +10,32 @@
         border-radius: 50%;
         overflow: hidden;
     }
+    
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255,255,255,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    
+    .loading-spinner {
+        background-color: #fff;
+        padding: 20px 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        font-size: 16px;
+        color: #4e73df;
+    }
+    
+    .loading-spinner i {
+        margin-right: 10px;
+    }
         :root {
             --primary: #4e73df;
             --secondary: #858796;
@@ -858,11 +884,11 @@
     <div class="container">
         <!-- 侧边导航栏 -->
         <div class="sidebar">
-            <div class="nav-item active" data-page="home">
+            <div class="nav-item active" data-page="home" onclick="loadMaterials()">
                 <i class="fas fa-home"></i>
                 <span>首页</span>
             </div>
-            <div class="nav-item" data-page="forum">
+            <div class="nav-item" data-page="forum" onclick="loadPosts()">
                 <i class="fas fa-comments"></i>
                 <span>班级论坛</span>
             </div>
@@ -870,7 +896,7 @@
                 <i class="fas fa-comment-dots"></i>
                 <span>实时聊天</span>
             </div>
-            <div class="nav-item" data-page="honor">
+            <div class="nav-item" data-page="honor" onclick="loadHonorWall()">
                 <i class="fas fa-trophy"></i>
                 <span>荣誉墙</span>
             </div>
@@ -880,6 +906,11 @@
         <div class="main-content">
             <!-- 首页 -->
             <div id="homePage" class="page-content active">
+                <div id="homeLoading" class="loading-overlay" style="display:none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
                 <h2 class="page-title">班级公告</h2>
                 <div class="announcement">
                     <p>欢迎来到23级护理四班交流论坛！</p>
@@ -924,6 +955,11 @@
 
             <!-- 班级论坛 -->
             <div id="forumPage" class="page-content">
+                <div id="forumLoading" class="loading-overlay" style="display:none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
                 <h2 class="page-title">班级论坛</h2>
                 <div class="form-group">
                     <input type="text" id="postTitle" class="form-control" placeholder="帖子标题">
@@ -961,6 +997,11 @@
 
             <!-- 荣誉墙 -->
             <div id="honorPage" class="page-content">
+                <div id="honorLoading" class="loading-overlay" style="display:none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
                 <h2 class="page-title">班级荣誉墙</h2>
                 <div id="honorWall" class="honor-wall">
                     <div class="skeleton-card" style="display:none;">
@@ -1083,8 +1124,21 @@
         }
     }
 
-    // 页面加载时立即调用函数
-    window.onload = fetchUserData;
+    // 荣誉墙加载函数
+    async function loadHonorWall() {
+        const honorWall = document.getElementById('honorWall');
+        if (!honorWall) return;
+        
+        try {
+            honorWall.innerHTML = '<div class="loading">正在加载荣誉墙...</div>';
+            
+            await fetchUserData();
+            await loadHonors(); // 使用统一的荣誉加载函数
+        } catch (error) {
+            console.error('荣誉墙加载失败:', error);
+            honorWall.innerHTML = '<div class="error">荣誉墙加载失败</div>';
+        }
+    }
         // 全局错误处理
         window.addEventListener('error', function(event) {
             console.error('全局错误:', event.error);
@@ -1123,6 +1177,11 @@
             localStorage.setItem('userAvatars', JSON.stringify([]));
         }
         
+        // 添加手动加载按钮事件
+        document.getElementById('loadMaterialsBtn')?.addEventListener('click', loadMaterials);
+        document.getElementById('loadForumBtn')?.addEventListener('click', loadPosts);
+        document.getElementById('loadHonorBtn')?.addEventListener('click', loadHonorWall);
+        
         // 解密5次的密钥
         const decryptBase64 = (str, times) => {
             for (let i = 0; i < times; i++) {
@@ -1160,12 +1219,42 @@
                 });
                 document.getElementById(pageId).classList.add('active');
                 
+                // 清除残留样式并显示加载提示
+                document.querySelectorAll('.loading-overlay').forEach(el => {
+                    el.style.display = 'none';
+                });
+                const loadingElement = document.getElementById(`${this.dataset.page}Loading`);
+                if (loadingElement) loadingElement.style.display = 'flex';
+                
+                // 清除页面缓存数据
+                switch(this.dataset.page) {
+                    case 'home':
+                        if (document.querySelector('#materialsContainer')) {
+                            document.querySelector('#materialsContainer').innerHTML = '';
+                        }
+                        break;
+                    case 'forum':
+                        if (document.querySelector('#postList')) {
+                            document.querySelector('#postList').innerHTML = '';
+                        }
+                        break;
+                    case 'honor':
+                        if (document.querySelector('#honorWall')) {
+                            document.querySelector('#honorWall').innerHTML = '';
+                        }
+                        break;
+                }
+                
                 switch(pageId) {
                     case 'homePage':
-                        loadMaterials();
+                        loadMaterials().finally(() => {
+                            if (loadingElement) loadingElement.style.display = 'none';
+                        });
                         break;
                     case 'forumPage':
-                        loadPosts();
+                        loadPosts().finally(() => {
+                            if (loadingElement) loadingElement.style.display = 'none';
+                        });
                         break;
                     case 'chatPage':
                         loadChatMessages().then(() => {
@@ -1174,7 +1263,9 @@
                         });
                         break;
                     case 'honorPage':
-                        loadHonors();
+                        loadHonorWall().finally(() => {
+                            if (loadingElement) loadingElement.style.display = 'none';
+                        });
                         break;
                 }
             });
@@ -2498,6 +2589,7 @@
             }
             
             // 初始加载数据
+            fetchUserData();
             loadMaterials();
             loadPosts();
             loadChatMessages();
@@ -2509,13 +2601,10 @@
             }
             
             // 设置定时器，每5秒静默刷新局部数据（不刷新整个页面）
-            setInterval(() => {
+            const refreshInterval = setInterval(() => {
                 try {
                     fetchUserData();
-                    loadMaterials();
-                    loadPosts();
                     loadChatMessages();
-                    loadHonors();
                 } catch (error) {
                     console.error('静默刷新失败:', error);
                 }
