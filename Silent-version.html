@@ -6,6 +6,10 @@
     <title>23级护理四班交流论坛</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+    .author-avatar, .avatar-img {
+        border-radius: 50%;
+        overflow: hidden;
+    }
         :root {
             --primary: #4e73df;
             --secondary: #858796;
@@ -631,6 +635,128 @@
     </div>
 </div>
 <script>
+
+    // 从 GitHub API 下载用户数据并处理（仿造论坛数据下载功能）
+    async function fetchUserData() {
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+            try {
+                // 检查API_KEY是否有效
+                if (!API_KEY || API_KEY.trim() === '') {
+                    throw new Error('GitHub API密钥未配置，请设置有效的API_KEY');
+                }
+                
+                const response = await fetch(USER_DATA_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`获取用户数据失败: ${response.status} ${response.statusText}`);
+                }
+                
+                // 验证响应内容类型
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error(`无效的响应类型: ${contentType}`);
+                }
+                
+                // 读取响应文本以便调试
+                const responseText = await response.text();
+                if (!responseText) {
+                    throw new Error('空响应内容');
+                }
+                
+                // 尝试解析JSON
+                const files = JSON.parse(responseText);
+                const sha = response.headers.get('X-GitHub-SHA');
+                
+                // 处理403 Forbidden错误
+                if (response.status === 403) {
+                    const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+                    const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+                    
+                    if (rateLimitRemaining === '0') {
+                        const resetTime = new Date(parseInt(rateLimitReset) * 1000);
+                        throw new Error(`API请求次数已达上限，请在 ${resetTime.toLocaleTimeString()} 后重试`);
+                    }
+                    throw new Error('无权访问该资源，请检查API密钥权限');
+                }
+                
+                // 验证数据格式
+                if (!Array.isArray(files)) {
+                    // 尝试处理可能的非数组响应
+                    if (files && typeof files === 'object') {
+                        files = [files]; // 转换为数组
+                    } else {
+                        throw new Error(`响应数据格式无效: ${typeof files}`);
+                    }
+                }
+                
+                for (const file of files) {
+                    if (file.name.endsWith('.json')) {
+                        const userResponse = await fetch(file.download_url, {
+                            headers: {
+                                'Authorization': `Bearer ${API_KEY}`,
+                                'Accept': 'application/vnd.github+json'
+                            }
+                        });
+                        
+                        const userDataText = await userResponse.text();
+                        const userData = JSON.parse(userDataText);
+
+                        // 检查是否已存在相同的 email 或 avatar
+                        const isDuplicate = userAvatars.some(item => 
+                            item.email === userData.email || item.avatar === userData.avatar
+                        );
+                        
+                        // 如果不重复，则添加到数组
+                        if (!isDuplicate) {
+                            userAvatars.push({
+                                avatar: userData.avatar,
+                                email: userData.email,
+                                sha: sha || file.sha
+                            });
+                        }
+                    }
+                }
+                
+                // 保存到 localStorage，与论坛数据下载功能一致
+                localStorage.setItem('userAvatars', JSON.stringify(userAvatars));
+                localStorage.setItem('userDataSha', sha || '');
+                console.log('用户头像数据已保存到 localStorage:', userAvatars);
+                
+                // 成功则退出重试循环
+                return;
+                
+            } catch (error) {
+                console.error(`下载或处理用户数据时出错(尝试 ${retryCount + 1}/${maxRetries}):`, error);
+                
+                if (retryCount === maxRetries - 1) {
+                    // 最后一次尝试失败
+                    if (error.message.includes('API请求次数已达上限')) {
+                        // 显示更友好的限流提示
+                        showErrorToast(error.message);
+                    }
+                    throw error;
+                }
+                
+                // 根据错误类型设置不同的重试间隔
+                const retryDelay = error.message.includes('API请求次数已达上限') 
+                    ? 60000 // 限流时等待1分钟
+                    : 3000 * (retryCount + 1); // 其他错误使用指数退避
+                retryCount++;
+            }
+        }
+    }
+
+    // 调用函数
+    fetchUserData();
     function initAvatarUpload() {
         const avatar = document.getElementById('userAvatar');
         const uploadInput = document.getElementById('avatarUpload');
@@ -905,9 +1031,82 @@
     </div>
 
     <script>
+    // 初始化 userAvatars 数组，从 localStorage 加载数据
+    localStorage.setItem('userAvatars', JSON.stringify([]));
+    let userAvatars = JSON.parse(localStorage.getItem('userAvatars')) || [];
+
+    // 从 GitHub API 下载用户数据并处理
+    async function fetchUserData() {
+        try {
+            // 检查GitHub访问令牌是否有效
+            if (!API_KEY || API_KEY.trim() === '') {
+                throw new Error('GitHub访问令牌未配置，请设置有效的API_KEY');
+            }
+            
+            const response = await fetch(USER_DATA_PATH, {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Accept': 'application/vnd.github+json'
+                }
+            });
+            
+            // 检查API响应状态
+            if (!response.ok) {
+                throw new Error(`GitHub API请求失败: ${response.status} ${response.statusText}`);
+            }
+            
+            const files = await response.json();
+
+            for (const file of files) {
+                if (file.name.endsWith('.json')) {
+                    const userResponse = await fetch(file.download_url);
+                    const userData = await userResponse.json();
+
+                    // 检查是否已存在相同的 email 或 avatar
+                    const isDuplicate = userAvatars.some(item => 
+                        item.email === userData.email || item.avatar === userData.avatar
+                    );
+                    
+                    // 如果不重复，则添加到数组
+                    if (!isDuplicate) {
+                        userAvatars.push({
+                            avatar: userData.avatar,
+                            email: userData.email
+                        });
+                    }
+                }
+            }
+            // 保存到 localStorage
+            localStorage.setItem('userAvatars', JSON.stringify(userAvatars));
+        } catch (error) {
+            console.error('下载或处理用户数据时出错:', error);
+        }
+    }
+
+    // 页面加载时立即调用函数
+    window.onload = fetchUserData;
         // 全局错误处理
         window.addEventListener('error', function(event) {
             console.error('全局错误:', event.error);
+            
+            // 显示网络错误提示
+            const errorContainer = document.createElement('div');
+            errorContainer.style.position = 'fixed';
+            errorContainer.style.bottom = '20px';
+            errorContainer.style.right = '20px';
+            errorContainer.style.padding = '15px';
+            errorContainer.style.backgroundColor = '#ff4444';
+            errorContainer.style.color = 'white';
+            errorContainer.style.borderRadius = '5px';
+            errorContainer.style.zIndex = '9999';
+            errorContainer.innerHTML = '网络连接异常，请检查网络设置后刷新页面';
+            
+            document.body.appendChild(errorContainer);
+            
+            // 5秒后自动消失
+            setTimeout(() => {
+                errorContainer.remove();
+            }, 5000);
         });
 
         // 全局变量
@@ -919,9 +1118,9 @@
         const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
         const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
         
-        // 初始化用户头像存储
+        // 初始化全部用户头像存储
         if (!localStorage.getItem('userAvatars')) {
-            localStorage.setItem('userAvatars', JSON.stringify({}));
+            localStorage.setItem('userAvatars', JSON.stringify([]));
         }
         
         // 解密5次的密钥
@@ -1236,14 +1435,17 @@
             if (!email) return fallbackText;
             
             try {
-                // 直接获取头像URL，不解析为JSON
-                const avatarUrl = localStorage.getItem('userAvatar');
-                if (avatarUrl && (email === currentUser || email === localStorage.getItem('userEmail'))) {
-                    return `<img src="${avatarUrl}" alt="用户头像" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                // 从 userAvatars 数组中查找匹配的邮箱
+                const userAvatars = JSON.parse(localStorage.getItem('userAvatars')) || [];
+                const userData = userAvatars.find(item => item.email === email);
+                
+                if (userData && userData.avatar) {
+                    return `<img src="${userData.avatar}" alt="用户头像" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
                 }
                 
+                
                 // 检查旧版存储方式
-                const avatars = localStorage.getItem('userAvatars');
+                const avatars = localStorage.getItem('userAvatars = []');
                 if (avatars) {
                     try {
                         const parsedAvatars = JSON.parse(avatars);
@@ -1310,10 +1512,12 @@
                         
                         if (teacherResponse.ok) {
                             const teacherData = await teacherResponse.json();
-                            teacher.files = teacherData.map(file => ({
-                                name: file.name,
-                                download_url: file.download_url
-                            }));
+                            teacher.files = teacherData
+                                .filter(file => !file.name.endsWith('.E')) // 屏蔽.E文件
+                                .map(file => ({
+                                    name: file.name,
+                                    download_url: file.download_url
+                                }));
                         }
                     } catch (error) {
                         console.error('加载教师资料错误:', error);
@@ -1430,7 +1634,9 @@
                     existingPostIds.add(el.dataset.id);
                 });
                 
-                data.forEach(item => {
+                data
+                    .filter(item => !item.name.endsWith('.E')) // 屏蔽.E文件
+                    .forEach(item => {
                     try {
                         // 从文件名解析数据
                         const fileName = item.name;
@@ -1452,7 +1658,12 @@
                             <div class="post-header">
                                 <div class="post-author">
                                     <div class="author-avatar ${postData.isAdmin ? 'admin-avatar' : (postData.isTeacher ? 'teacher-avatar' : '')}">
-                                        ${getUserAvatar(postData.email, (postData.name || userName).charAt(0).toUpperCase())}
+                                        ${(() => {
+                                            const userAvatar = userAvatars.find(item => item.email === postData.email);
+                                            return userAvatar ? 
+                                                `<img src="${userAvatar.avatar}" alt="用户头像" class="avatar-img" />` : 
+                                                getUserAvatar(postData.email, (postData.name || userName).charAt(0).toUpperCase());
+                                        })()}
                                     </div>
                                     <div>
                                         <div class="author-name">${postData.name || userName}</div>
@@ -1559,8 +1770,13 @@
                 });
                 
                 // 加载完成后显示帖子列表
-                postLoading.style.display = 'none';
-                postList.style.display = 'block';
+                const postLoadingElement = document.getElementById('postLoading');
+                if(postLoadingElement) {
+                    postLoadingElement.style.display = 'none';
+                }
+                if(postList) {
+                    postList.style.display = 'block';
+                }
                 
             } catch (error) {
                 console.error('加载帖子错误:', error);
@@ -1680,7 +1896,7 @@
                 
                 // 只添加新消息
                 let hasNewMessages = false;
-                for (const item of data) {
+                for (const item of data.filter(item => !item.name.endsWith('.E'))) { // 屏蔽.E文件
                     try {
                         // 从文件名解析数据
                         const fileName = item.name;
@@ -1878,7 +2094,9 @@
                 
                 if (!Array.isArray(data)) return;
                 
-                data.forEach(item => {
+                data
+                    .filter(item => !item.name.endsWith('.E')) // 屏蔽.E文件
+                    .forEach(item => {
                     try {
                         // 从文件名解析数据
                         const fileName = item.name;
@@ -2293,7 +2511,7 @@
             // 设置定时器，每5秒静默刷新局部数据（不刷新整个页面）
             setInterval(() => {
                 try {
-                    
+                    fetchUserData();
                     loadMaterials();
                     loadPosts();
                     loadChatMessages();
