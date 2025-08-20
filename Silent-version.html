@@ -917,18 +917,6 @@
                     </div>
                     <button id="uploadMaterialBtn" class="btn btn-primary">上传</button>
                 </div>
-                <div id="materialUploadSection" style="display: none; margin-top: 20px;">
-                    <h3>上传学习资料</h3>
-                    <div class="form-group">
-                        <label class="form-label">上传文件</label>
-                        <div class="upload-area">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
-                            <p>点击或拖拽文件到此处上传</p>
-                            <input type="file" id="materialFileInput" style="display: none;">
-                        </div>
-                    </div>
-                    <button id="uploadMaterialBtn" class="btn btn-primary">上传</button>
-                </div>
             </div>
 
             <!-- 班级论坛 -->
@@ -971,6 +959,17 @@
                         <button id="sendMessageBtn" class="btn btn-primary">发送</button>
                     </div>
                 </div>
+                <script>
+
+
+
+                    // 监听回车键
+                    document.getElementById('chatInput').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            document.getElementById('sendMessageBtn').click();
+                        }
+                    });
+                </script>
             </div>
 
             <!-- 荣誉墙 -->
@@ -1146,6 +1145,7 @@
         const CHAT_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Chat%20room/";
         const POST_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Chat/Post/";
         const TEACHER_PATH = "https://api.github.com/repos/operate-js/text-3/contents/root/Teacher%20List/";
+        const ADMIN_PATH = "https://api.github.com/repos/operate-js/text-3/contents/administrator/";
         const HONOR_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Wall%20of%20Fame/";
         const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
         const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
@@ -1422,14 +1422,33 @@
         
         // 更新UI权限
         function updateUIPermissions() {
-            document.getElementById('honorEditSection').style.display = isTeacher ? 'block' : 'none';
-            document.getElementById('materialUploadSection').style.display = isTeacher ? 'block' : 'none';
+            // 确保邮箱匹配
+            if (!currentUser) return;
             
-            if (isAdmin) {
-                userAvatar.classList.add('admin-avatar');
-            } else if (isTeacher) {
-                userAvatar.classList.add('teacher-avatar');
-            }
+            // 获取管理员列表并更新权限
+            getAdminList().then(admins => {
+                const adminEmails = admins.map(admin => admin.email);
+                if (adminEmails.includes(currentUser)) {
+                    isAdmin = true;
+                    userAvatar.classList.add('admin-avatar');
+                }
+                
+                // 管理员和教师都可以看到编辑区域
+                const isEditor = isAdmin || isTeacher;
+                document.getElementById('honorEditSection').style.display = isEditor ? 'block' : 'none';
+                document.getElementById('materialUploadSection').style.display = isEditor ? 'block' : 'none';
+                
+                // 更新头像样式
+                if (isAdmin) {
+                    userAvatar.classList.add('admin-avatar');
+                } else if (isTeacher) {
+                    userAvatar.classList.add('teacher-avatar');
+                }
+                
+                // 同步权限到本地存储
+                localStorage.setItem('isAdmin', isAdmin);
+                localStorage.setItem('isTeacher', isTeacher);
+            });
         }
         
         // 保存用户数据到云存储
@@ -1632,7 +1651,7 @@
                                             <button class="btn btn-primary download-btn" data-url="${file.download_url}">
                                                 <i class="fas fa-download"></i>
                                             </button>
-                                            ${isTeacher ? `<button class="btn btn-danger delete-file-btn" data-path="${MATERIALS_PATH}${encodeURIComponent(teacher.name)}/${encodeURIComponent(file.name)}">
+                                            ${(isTeacher || isAdmin) ? `<button class="btn btn-danger delete-file-btn" data-path="${MATERIALS_PATH}${encodeURIComponent(teacher.name)}/${encodeURIComponent(file.name)}">
                                                 <i class="fas fa-trash"></i>
                                             </button>` : ''}
                                         </div>
@@ -1759,7 +1778,7 @@
                                     </div>
                                 </div>
                                 <div class="post-actions">
-                                    ${(currentUser === email || isAdmin) ? 
+                                    ${(currentUser === email || isAdmin || isTeacher) ? 
                                         `<button class="btn btn-danger delete-post-btn" 
                                             data-id="${postData.id}"
                                             data-filename="${fileName}"
@@ -2133,6 +2152,22 @@
                 name: localStorage.getItem('userName') || currentUser
             };
             
+
+            // 发送到 WebSocket
+            try {
+                if (typeof WebSocketManager === 'function') {
+                    const webSocketManager = new WebSocketManager();
+                    if (typeof webSocketManager.sendMessageToWebSocket === 'function') {
+                        webSocketManager.sendMessageToWebSocket(messageData);
+                    } else {
+                        console.error('sendMessageToWebSocket 方法不存在');
+                    }
+                } else {
+                    console.error('WebSocketManager 类未定义');
+                }
+            } catch (error) {
+                console.error('WebSocket 消息发送失败:', error);
+            }
             // 将数据编码为Base64作为文件名
             const dataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(messageData))));
             const fileName = `${dataBase64}.json.png`;
@@ -2163,6 +2198,33 @@
             }
         });
         
+        // 获取管理员列表
+        async function getAdminList() {
+            try {
+                const response = await fetch(ADMIN_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) return [];
+                
+                const data = await response.json();
+                if (!Array.isArray(data)) return [];
+                
+                // 只获取文件名中的邮箱
+                return data.filter(item => !item.name.endsWith('.E')).map(item => {
+                    const fileName = item.name;
+                    const emailMatch = fileName.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+                    return emailMatch ? { email: emailMatch[0] } : null;
+                }).filter(Boolean);
+            } catch (error) {
+                console.error('获取管理员列表错误:', error);
+                return [];
+            }
+        }
+
         // 加载荣誉墙
         async function loadHonors() {
             const honorWall = document.getElementById('honorWall');
@@ -2198,7 +2260,7 @@
                         const dataPart = fileName.split('.')[0];
                         const base64Decoded = atob(dataPart);
                         // 修复编码问题
-            const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
+                        const decodedStr = decodeURIComponent(escape(base64Decoded)); // 确保UTF-8编码正确解析 // 确保UTF-8编码正确解析
                         const honorData = JSON.parse(decodedStr);
                         
                         const honorCard = document.createElement('div');
@@ -2210,7 +2272,7 @@
                                 <button class="btn btn-primary">
                                     <i class="fas fa-share"></i> 分享荣誉
                                 </button>
-                                ${isTeacher ? `<button class="btn btn-danger delete-honor-btn" data-id="${honorData.id}">
+                                ${(isTeacher || isAdmin) ? `<button class="btn btn-danger delete-honor-btn" data-id="${honorData.id}">
                                     <i class="fas fa-trash"></i>
                                 </button>` : ''}
                             </div>
@@ -2366,6 +2428,15 @@
             
             if (!title || !description) {
                 alert('请填写标题和描述');
+                return;
+            }
+            
+            // 从本地存储加载管理员状态
+            const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+            const storedIsTeacher = localStorage.getItem('isTeacher') === 'true';
+            
+            if (!storedIsTeacher && !storedIsAdmin) {
+                alert('只有教师或管理员可以上传荣誉墙内容');
                 return;
             }
             
@@ -2544,6 +2615,15 @@
                 
                 if (!fileInput || !currentUser) return;
                 
+                // 从本地存储加载管理员状态
+                const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+                const storedIsTeacher = localStorage.getItem('isTeacher') === 'true';
+                
+                if (!storedIsTeacher && !storedIsAdmin) {
+                    alert('只有教师或管理员可以上传学习资料');
+                    return;
+                }
+                
                 const files = fileInput.files;
                 
                 if (files.length === 0) {
@@ -2597,7 +2677,298 @@
                 document.getElementById('materialFileInput').click();
             });
         });
+        </Script>
+        <script>
 
+class WebSocketExtension {
+  constructor() {
+    this.instances = {};
+  }
+
+  /**
+   * window.onWebSocketMessage=当接收到消息时调用的函数
+   * @param {string} url
+   * @param {string} [instanceId="default"]
+   * @returns {Promise<void>}
+   */
+  connect(url, instanceId = "default") {
+    return new Promise((resolve, reject) => {
+      if (!/^(ws|wss):/i.test(url)) {
+        if (/^(?!(ws|http)s?:\/\/).*$/i.test(url)) {
+          url = `wss://${url}`;
+        } else if (/^(http|https):/i.test(url)) {
+          const urlParts = url.split(":");
+          urlParts[0] = url.toLowerCase().startsWith("https") ? "wss" : "ws";
+          url = urlParts.join(":");
+        } else {
+          reject(new Error("Invalid URL format"));
+          return;
+        }
+      }
+
+      const oldInstance = this.instances[instanceId];
+      if (oldInstance) {
+        oldInstance.destroyed = true;
+        if (oldInstance.websocket) {
+          oldInstance.websocket.close();
+        }
+      }
+
+      const instance = {
+        destroyed: false,
+        errored: false,
+        closeMessage: "",
+        closeCode: 0,
+        data: "",
+        websocket: null,
+        messageQueue: [],
+        listeners: {
+          open: [],
+          message: [],
+          error: [],
+          close: []
+        }
+      };
+      this.instances[instanceId] = instance;
+
+      try {
+        const websocket = new WebSocket(url);
+        instance.websocket = websocket;
+
+        websocket.onopen = (e) => {
+          if (instance.destroyed) {
+            websocket.close();
+            return;
+          }
+          instance.listeners.open.forEach(callback => callback(e));
+          // Send handshake message
+          websocket.send(JSON.stringify({
+            method: "handshake",
+            project_id: "websocket example",
+            user: "player1234"
+          }));
+          resolve();
+        };
+
+        websocket.onclose = (e) => {
+          if (!instance.errored) {
+            instance.closeMessage = e.reason || "";
+            instance.closeCode = e.code;
+            instance.listeners.close.forEach(callback => callback(e));
+          }
+        };
+
+        websocket.onerror = (e) => {
+          console.error("WebSocket error", e);
+          instance.errored = true;
+          instance.listeners.error.forEach(callback => callback(e));
+        };
+
+        websocket.onmessage = (e) => {
+          if (instance.destroyed) return;
+          let data = e.data;
+          if (data instanceof Blob) {
+            const fr = new FileReader();
+            fr.onload = () => {
+              instance.data = fr.result;
+              instance.listeners.message.forEach(callback => callback(fr.result));
+              // Call user-defined function with the received data
+              if (typeof window.onWebSocketMessage === 'function') {
+                try {
+                  const parsedData = JSON.parse(fr.result);
+                  // 处理特殊格式的消息
+                  if (parsedData.method === "set" && parsedData.name === "variable") {
+                    const valueStr = parsedData.value.replace(/\//g, ':');
+                    const valueData = JSON.parse(valueStr);
+                    window.onWebSocketMessage(valueData);
+                  } else {
+                    window.onWebSocketMessage(parsedData);
+                  }
+                } catch (error) {
+                  console.error('解析 WebSocket 消息时出错:', error);
+                }
+              }
+            };
+            fr.readAsDataURL(data);
+          } else {
+            instance.data = data;
+            instance.listeners.message.forEach(callback => callback(data));
+            // Call user-defined function with the received data
+            if (typeof window.onWebSocketMessage === 'function') {
+              try {
+                const parsedData = JSON.parse(data);
+                // 处理特殊格式的消息
+                if (parsedData.method === "set" && parsedData.name === "variable") {
+                  const valueStr = parsedData.value.replace(/\//g, ':');
+                  const valueData = JSON.parse(valueStr);
+                  window.onWebSocketMessage(valueData);
+                } else {
+                  window.onWebSocketMessage(parsedData);
+                }
+              } catch (error) {
+                console.error('解析 WebSocket 消息时出错:', error);
+              }
+            }
+          }
+        };
+      } catch (error) {
+        console.error("Failed to open WebSocket connection", error);
+        instance.errored = true;
+        instance.listeners.error.forEach(callback => callback(error));
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Sends a message through the WebSocket.
+   * @param {string} message - The message to send.
+   * @param {string} [instanceId="default"] - Optional instance ID.
+   */
+  send(message, instanceId = "default") {
+    const instance = this.instances[instanceId];
+    if (!instance || !instance.websocket) return;
+    if (instance.websocket.readyState === WebSocket.CONNECTING) {
+      setTimeout(() => this.send(message, instanceId), 100);
+    } else if (instance.websocket.readyState === WebSocket.OPEN) {
+      // Replace colons with underscores in the message
+      const sanitizedMessage = message.replace(/:/g, "/");
+      // Wrap the message in the specified JSON structure
+      const wrappedMessage = JSON.stringify({
+        method: "set",
+        name: "variable",
+        value: sanitizedMessage
+      });
+      instance.websocket.send(wrappedMessage);
+    }
+  };
+}
+  /**
+   * Sends a chat message through the WebSocket.
+   * @param {object} messageData - The message data to send.
+   */
+class WebSocketManager {
+  constructor() {
+    this.instances = {};
+  }
+
+  /**
+   * Connects to a WebSocket server.
+   * @param {string} url - WebSocket server URL.
+   * @param {string} [instanceId="default"] - Optional instance ID.
+   */
+  async connect(url, instanceId = "default") {
+    if (this.instances[instanceId] && this.instances[instanceId].websocket) {
+      return;
+    }
+
+    this.instances[instanceId] = {
+      websocket: new WebSocket(url),
+      destroyed: false
+    };
+
+    const socket = this.instances[instanceId].websocket;
+
+    socket.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    socket.onclose = (event) => {
+      if (!this.instances[instanceId].destroyed) {
+        console.log('WebSocket disconnected, attempting to reconnect...');
+        setTimeout(() => this.connect(url, instanceId), 3000);
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  }
+
+  /**
+   * Sends a chat message through the WebSocket.
+   * @param {object} messageData - The message data to send.
+   */
+  async sendMessageToWebSocket(messageData) {
+    try {
+      if (!this.instances.default || !this.instances.default.websocket) {
+        console.error('WebSocket instance not initialized');
+        await this.connect('wss://clouddata.turbowarp.org/');
+        if (!this.instances.default || !this.instances.default.websocket) {
+          console.error('Failed to initialize WebSocket');
+          return;
+        }
+      }
+      const socket = this.instances.default.websocket;
+      if (socket.readyState === WebSocket.OPEN) {
+        const processedData = JSON.stringify(messageData).replace(/:/g, '/');
+        const message = JSON.stringify({
+          method: 'set',
+          name: 'variable',
+          value: processedData
+        });
+        // 上传到服务器
+        this.send(message);
+        socket.send(message);
+      } else {
+        console.error('WebSocket is not connected');
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  }
+
+  /**
+   * Closes the WebSocket connection.
+   * @param {number} [code=1000] - Close code.
+   * @param {string} [reason=""] - Close reason.
+   * @param {string} [instanceId="default"] - Optional instance ID.
+   */
+  close(code = 1000, reason = "", instanceId = "default") {
+    const instance = this.instances[instanceId];
+    if (!instance || !instance.websocket) return;
+    instance.destroyed = true;
+    instance.websocket.close(code, reason);
+  }
+
+  /**
+   * Adds an event listener.
+   * @param {string} event - Event type ("open", "message", "error", "close").
+   * @param {Function} callback - Callback function.
+   * @param {string} [instanceId="default"] - Optional instance ID.
+   */
+  on(event, callback, instanceId = "default") {
+    const instance = this.instances[instanceId];
+    if (!instance) return;
+    if (instance.listeners[event]) {
+      instance.listeners[event].push(callback);
+    }
+  }
+
+  /**
+   * Removes an event listener.
+   * @param {string} event - Event type ("open", "message", "error", "close").
+   * @param {Function} callback - Callback function.
+   * @param {string} [instanceId="default"] - Optional instance ID.
+   */
+  off(event, callback, instanceId = "default") {
+    const instance = this.instances[instanceId];
+    if (!instance) return;
+    if (instance.listeners[event]) {
+      instance.listeners[event] = instance.listeners[event].filter(
+        cb => cb !== callback
+      );
+    }
+  }
+}
+    
+
+    // Export for use in HTML
+    const webSocketExtension = new WebSocketExtension();
+    window.WebSocketExtension = webSocketExtension;
+
+    // Connect to the WebSocket server automatically
+    webSocketExtension.connect("wss://clouddata.turbowarp.org/");
     </script>
 </body>
 </html>
