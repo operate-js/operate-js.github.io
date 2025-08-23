@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>23级护理四班交流论坛</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://extensions.turbowarp.org/godslayerakp/ws.js"></script>
     <style>
     .author-avatar, .avatar-img {
         border-radius: 50%;
@@ -163,6 +164,23 @@
             top: 60px;
             height: calc(100vh - 60px);
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 消息容器样式 */
+        .sidebar-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
+        }
+
+        .sidebar-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fc;
+            border-radius: 5px;
         }
 
         .nav-item {
@@ -650,7 +668,7 @@
     <!-- 头部导航 -->
     <header>
         <div class="logo">
-            <i class="fas fa-users"></i>
+            <img src="https://operate-js.github.io/text/logo.svg" alt="logo" style="width: 24px; height: 24px;">
             <span>23级护理四班交流论坛</span>
         </div>
         <div class="user-controls">
@@ -878,6 +896,10 @@
                 <i class="fas fa-trophy"></i>
                 <span>荣誉墙</span>
             </div>
+            <div class="nav-item" data-page="messages" onclick="loadMessages()">
+                <i class="fas fa-envelope"></i>
+                <span>消息</span>
+            </div>
         </div>
 
         <!-- 主内容区 -->
@@ -890,10 +912,16 @@
                     </div>
                 </div>
                 <h2 class="page-title">班级公告</h2>
-                <div class="announcement">
+                <div id="announcementLoading" class="loading-overlay" style="display: none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
+                <div id="announcementContainer" class="announcement">
                     <p>欢迎来到23级护理四班交流论坛！</p>
                     <p>这里是班级信息发布、学习资源共享和同学交流的平台。</p>
                 </div>
+                <div id="announcementError" class="error-message" style="display:none;"></div>
                 
                 <h2 class="page-title">学习资料</h2>
                 <div id="materialsContainer">
@@ -969,11 +997,289 @@
                             document.getElementById('sendMessageBtn').click();
                         }
                     });
+                    
+                    // 加载消息页面
+                    function loadMessages() {
+                        try {
+                            // 确保消息页面存在
+                            const messagePage = document.getElementById('messagePage');
+                            if (!messagePage) {
+                                console.error('消息页面元素未找到');
+                                return;
+                            }
+                            
+                            // 安全切换页面
+                            const pages = document.querySelectorAll('.page-content');
+                            if (pages) {
+                                pages.forEach(page => {
+                                    if (page && page.classList) {
+                                        page.classList.remove('active');
+                                    }
+                                });
+                            }
+                            
+                            messagePage.classList.add('active');
+                            
+                            // 这里可以添加消息加载逻辑
+                            console.log('消息页面已加载');
+                        } catch (error) {
+                            console.error('加载消息页面时出错:', error);
+                        }
+                    }
                 </script>
             </div>
 
             <!-- 荣誉墙 -->
             <div id="honorPage" class="page-content">
+            
+            <!-- 消息中心 -->
+            <div id="messagePage" class="page-content">
+                <script>
+                    // 兜底示例数据
+                    const messageExamples = {
+                        mentions: [
+                            {
+                                id: 1,
+                                avatar: 'https://operate-js.github.io/text/logo.svg',
+                                username: '系统管理员',
+                                time: '2025-08-23 10:30',
+                                content: '@你 欢迎使用班级论坛系统！',
+                                source: '系统公告',
+                                sourceLink: '#'
+                            },
+                            {
+                                id: 2,
+                                avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+                                username: '李护士长',
+                                time: '2025-08-22 15:45',
+                                content: '@你 请查看最新的护理操作指南',
+                                source: '学习资料',
+                                sourceLink: '#'
+                            }
+                        ],
+                        comments: [
+                            {
+                                id: 1,
+                                avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+                                username: '张医生',
+                                time: '2025-08-21 09:20',
+                                content: '这个病例分析得很到位，我补充几点...',
+                                source: '病例讨论',
+                                sourceLink: '#'
+                            },
+                            {
+                                id: 2,
+                                avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
+                                username: '王护士',
+                                time: '2025-08-20 14:10',
+                                content: '同意楼主的观点，实践中确实如此',
+                                source: '护理经验分享',
+                                sourceLink: '#'
+                            }
+                        ],
+                        replies: [
+                            {
+                                id: 1,
+                                avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
+                                username: '赵同学',
+                                time: '2025-08-19 16:30',
+                                content: '回复你的提问：这个问题在教材第45页有详细说明',
+                                source: '学习疑问解答',
+                                sourceLink: '#'
+                            },
+                            {
+                                id: 2,
+                                avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
+                                username: '刘学姐',
+                                time: '2025-08-18 11:15',
+                                content: '回复你的评论：感谢指正，我已经更新了资料',
+                                source: '学习资料更新',
+                                sourceLink: '#'
+                            }
+                        ]
+                    };
+                </script>
+                <h2 class="page-title">消息中心</h2>
+                <div class="message-container">
+                    <div class="message-tabs">
+                        <button class="message-tab active" data-tab="mentions">@我的</button>
+                        <button class="message-tab" data-tab="comments">评论</button>
+                        <button class="message-tab" data-tab="replies">回复</button>
+                    </div>
+                    
+                    <div class="message-list" id="mentionsTab">
+                        <div class="message-loading" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> 加载中...
+                        </div>
+                        
+                        <div class="message-empty" style="display:none;">
+                            <i class="fas fa-inbox"></i>
+                            <p>暂无@你的消息</p>
+                        </div>
+                        
+                        <!-- @消息动态加载 -->
+                        <div class="message-item">
+                            <div class="message-avatar" style="background-image: url('https://operate-js.github.io/text/logo.svg');"></div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-user">系统管理员</span>
+                                    <span class="message-time">2025-08-23 10:30</span>
+                                </div>
+                                <div class="message-text">
+                                    <span class="message-mention">@你</span> 欢迎使用班级论坛系统！
+                                </div>
+                                <div class="message-source">
+                                    来自: <a href="#">系统公告</a>
+                                </div>
+                                <div class="message-actions">
+                                    <span class="message-action">回复</span>
+                                    <span class="message-action">标记已读</span>
+                                    <span class="message-action">删除</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="message-list" id="commentsTab" style="display:none;">
+                        <div class="message-loading" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> 加载中...
+                        </div>
+                        
+                        <div class="message-empty" style="display:none;">
+                            <i class="fas fa-inbox"></i>
+                            <p>暂无评论消息</p>
+                        </div>
+                        
+                        <!-- 评论消息动态加载 -->
+                    </div>
+                    
+                    <div class="message-list" id="repliesTab" style="display:none;">
+                        <div class="message-loading" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> 加载中...
+                        </div>
+                        
+                        <div class="message-empty" style="display:none;">
+                            <i class="fas fa-inbox"></i>
+                            <p>暂无回复消息</p>
+                        </div>
+                        
+                        <!-- 回复消息动态加载 -->
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                /* 消息中心样式 */
+                .message-container {
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    padding: 20px;
+                }
+                
+                .message-tabs {
+                    display: flex;
+                    border-bottom: 1px solid #eee;
+                    margin-bottom: 20px;
+                }
+                
+                .message-tab {
+                    padding: 10px 20px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    color: var(--secondary);
+                    position: relative;
+                    transition: all 0.3s;
+                }
+                
+                .message-tab:hover {
+                    color: var(--primary);
+                }
+                
+                .message-tab.active {
+                    color: var(--primary);
+                    font-weight: 600;
+                }
+                
+                .message-tab.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: var(--primary);
+                }
+                
+                .message-item {
+                    display: flex;
+                    padding: 15px 0;
+                    border-bottom: 1px solid #f0f3ff;
+                    transition: background 0.3s;
+                }
+                
+                .message-item:hover {
+                    background: #f8fbff;
+                }
+                
+                .message-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    margin-right: 15px;
+                    background-size: cover;
+                    background-position: center;
+                }
+                
+                .message-content {
+                    flex: 1;
+                }
+                
+                .message-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                
+                .message-user {
+                    font-weight: 600;
+                    color: var(--dark);
+                }
+                
+                .message-time {
+                    font-size: 0.85rem;
+                    color: var(--secondary);
+                }
+                
+                .message-text {
+                    line-height: 1.5;
+                    margin-bottom: 5px;
+                }
+                
+                .message-source {
+                    font-size: 0.9rem;
+                    color: var(--primary);
+                }
+                
+                .message-actions {
+                    margin-top: 10px;
+                    display: flex;
+                    gap: 15px;
+                }
+                
+                .message-action {
+                    color: var(--secondary);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: color 0.3s;
+                }
+                
+                .message-action:hover {
+                    color: var(--primary);
+                }
+            </style>
                 <div id="honorLoading" class="loading-overlay" style="display:none;">
                     <div class="loading-spinner">
                         <i class="fas fa-spinner fa-spin"></i> 加载中...
@@ -1150,6 +1456,8 @@
         const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
         const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
         const MSG_PATH = "https://api.github.com/repos/operate-js/text-3/contents/message/";
+        
+
         // 初始化全部用户头像存储
         if (!localStorage.getItem('userAvatars')) {
             localStorage.setItem('userAvatars', JSON.stringify([]));
@@ -1170,6 +1478,109 @@
         
         const API_KEY = decryptBase64("VmpKd1MyTXdNVWhTYTJ4WFlsZDRXbFJVUWt0aU1YQkdWMVJTYkZKVVJsZFZNblJUVldzeFIyTkdhRlZXUlVwNVdrUktWMUpYU2tkaFJuQnBVak5vTVZkc1pEUlNNRFZIVjJ0V1UySkhhRnBVVlZKelpHeHNXV05IT1ZaU01GcDVXbFZTVDFaWFNsZFRWRUpYVWpOb2VsWnJWVEZXTVZaeVpFZHdUbUpGY0hwV1YzUnJWREF3ZVZWdVVsTmhiRnBSVld0a2IxVkdXa2RWYXpsVFZtdHNNMXBJY0ZkaFJscDBXa1JPVm1GclduSlpiWGhhWld4T1ZWRnNTbGRXVm5CS1ZteFdWMk14V1hoVVdHUlRZa1p3VkZsc1pGTmxiR3QzVm01a1QxcDZNRGs9", 5);
         
+        // 示例消息数据
+        const EXAMPLE_MESSAGES = [
+            {
+                sender: "班主任",
+                time: "10:30",
+                content: "同学们好！今天我们将讨论下周的课程安排。"
+            },
+            {
+                sender: "张三",
+                time: "10:32",
+                content: "老师好！我已经准备好了。"
+            },
+            {
+                sender: "李四",
+                time: "10:33",
+                content: "我也准备好了！"
+            }
+        ];
+        
+        // 加载消息
+        async function loadMessages() {
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (!messagesContainer) return;
+            
+            try {
+                const response = await fetch(MESSAGES_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`消息加载失败: ${response.status}`);
+                }
+                
+                const files = await response.json();
+                messagesContainer.innerHTML = '';
+                
+                let hasMessages = false;
+                
+                for (const file of files) {
+                    if (file.name.endsWith('.json')) {
+                        const messageResponse = await fetch(file.download_url);
+                        const messageData = await messageResponse.json();
+                        
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'message';
+                        messageElement.innerHTML = `
+                            <div class="message-header">
+                                <div class="post-author">
+                                    <div class="author-avatar">${messageData.sender.charAt(0)}</div>
+                                    <div class="author-name">${messageData.sender}</div>
+                                </div>
+                                <div class="message-time">${messageData.time}</div>
+                            </div>
+                            <div class="message-content">${messageData.content}</div>
+                        `;
+                        messagesContainer.appendChild(messageElement);
+                        hasMessages = true;
+                    }
+                }
+                
+                // 如果没有真实消息，显示示例数据
+                if (!hasMessages) {
+                    EXAMPLE_MESSAGES.forEach(message => {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'message';
+                        messageElement.innerHTML = `
+                            <div class="message-header">
+                                <div class="post-author">
+                                    <div class="author-avatar">${message.sender.charAt(0)}</div>
+                                    <div class="author-name">${message.sender}</div>
+                                </div>
+                                <div class="message-time">${message.time}</div>
+                            </div>
+                            <div class="message-content">${message.content}</div>
+                        `;
+                        messagesContainer.appendChild(messageElement);
+                    });
+                }
+            } catch (error) {
+                console.error('加载消息时出错:', error);
+                
+                // 如果加载失败，显示示例数据
+                EXAMPLE_MESSAGES.forEach(message => {
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message';
+                    messageElement.innerHTML = `
+                        <div class="message-header">
+                            <div class="post-author">
+                                <div class="author-avatar">${message.sender.charAt(0)}</div>
+                                <div class="author-name">${message.sender}</div>
+                            </div>
+                            <div class="message-time">${message.time}</div>
+                        </div>
+                        <div class="message-content">${message.content}</div>
+                    `;
+                    messagesContainer.appendChild(messageElement);
+                });
+            }
+        }
+        
         let currentUser = null;
         let isAdmin = false;
         let isTeacher = false;
@@ -1188,63 +1599,99 @@
         // 页面导航
         navItems.forEach(item => {
             item.addEventListener('click', function() {
-                navItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                
-                const pageId = this.dataset.page + 'Page';
-                pageContents.forEach(page => {
-                    page.classList.remove('active');
-                });
-                document.getElementById(pageId).classList.add('active');
-                
-                // 清除残留样式并显示加载提示
-                document.querySelectorAll('.loading-overlay').forEach(el => {
-                    el.style.display = 'none';
-                });
-                const loadingElement = document.getElementById(`${this.dataset.page}Loading`);
-                if (loadingElement) loadingElement.style.display = 'flex';
-                
-                // 清除页面缓存数据
-                switch(this.dataset.page) {
-                    case 'home':
-                        if (document.querySelector('#materialsContainer')) {
-                            document.querySelector('#materialsContainer').innerHTML = '';
+                try {
+                    // 安全处理导航项样式
+                    navItems.forEach(i => {
+                        if (i && i.classList) {
+                            i.classList.remove('active');
                         }
-                        break;
-                    case 'forum':
-                        if (document.querySelector('#postList')) {
-                            document.querySelector('#postList').innerHTML = '';
+                    });
+                    
+                    if (this && this.classList) {
+                        this.classList.add('active');
+                    }
+                    
+                    // 安全切换页面内容
+                    const pageId = this.dataset.page + 'Page';
+                    const targetPage = document.getElementById(pageId);
+                    
+                    if (pageContents && pageContents.length > 0) {
+                        pageContents.forEach(page => {
+                            if (page && page.classList) {
+                                page.classList.remove('active');
+                            }
+                        });
+                    }
+                    
+                    if (targetPage && targetPage.classList) {
+                        targetPage.classList.add('active');
+                    }
+                    
+                    // 清除残留样式并显示加载提示
+                    document.querySelectorAll('.loading-overlay').forEach(el => {
+                        if (el && el.style) {
+                            el.style.display = 'none';
                         }
-                        break;
-                    case 'honor':
-                        if (document.querySelector('#honorWall')) {
-                            document.querySelector('#honorWall').innerHTML = '';
-                        }
-                        break;
-                }
-                
-                switch(pageId) {
-                    case 'homePage':
-                        loadMaterials().finally(() => {
-                            if (loadingElement) loadingElement.style.display = 'none';
-                        });
-                        break;
-                    case 'forumPage':
-                        loadPosts().finally(() => {
-                            if (loadingElement) loadingElement.style.display = 'none';
-                        });
-                        break;
-                    case 'chatPage':
-                        loadChatMessages().then(() => {
-                            // 确保聊天区加载完成后再滚动
-                            scrollChatToBottom();
-                        });
-                        break;
-                    case 'honorPage':
-                        loadHonorWall().finally(() => {
-                            if (loadingElement) loadingElement.style.display = 'none';
-                        });
-                        break;
+                    });
+                    
+                    const loadingElement = document.getElementById(`${this.dataset.page}Loading`);
+                    if (loadingElement && loadingElement.style) {
+                        loadingElement.style.display = 'flex';
+                    }
+                    
+                    // 清除页面缓存数据
+                    switch(this.dataset.page) {
+                        case 'home':
+                            const materialsContainer = document.querySelector('#materialsContainer');
+                            if (materialsContainer) {
+                                materialsContainer.innerHTML = '';
+                            }
+                            break;
+                        case 'forum':
+                            const postList = document.querySelector('#postList');
+                            if (postList) {
+                                postList.innerHTML = '';
+                            }
+                            break;
+                        case 'honor':
+                            const honorWall = document.querySelector('#honorWall');
+                            if (honorWall) {
+                                honorWall.innerHTML = '';
+                            }
+                            break;
+                    }
+                    
+                    switch(pageId) {
+                        case 'homePage':
+                            loadMaterials().finally(() => {
+                                if (loadingElement && loadingElement.style) {
+                                    loadingElement.style.display = 'none';
+                                }
+                            });
+                            break;
+                        case 'forumPage':
+                            loadPosts().finally(() => {
+                                if (loadingElement && loadingElement.style) {
+                                    loadingElement.style.display = 'none';
+                                }
+                            });
+                            break;
+                        case 'chatPage':
+                            loadChatMessages().then(() => {
+                                // 确保聊天区加载完成后再滚动
+                                scrollChatToBottom();
+                            });
+                            break;
+                        case 'honorPage':
+                            loadHonorWall().finally(() => {
+                                if (loadingElement && loadingElement.style) {
+                                    loadingElement.style.display = 'none';
+                                }
+                            });
+                            break;
+                    }
+                } catch (error) {
+                    console.error('页面导航出错:', error);
                 }
             });
         });
@@ -1720,6 +2167,59 @@
             }
         }
         
+        // 加载公告
+        async function loadAnnouncements() {
+            const announcementContainer = document.getElementById('announcementContainer');
+            const announcementLoading = document.getElementById('announcementLoading');
+            const announcementError = document.getElementById('announcementError');
+            
+            if (!announcementContainer) return;
+            
+            try {
+                announcementLoading.style.display = 'flex';
+                announcementError.style.display = 'none';
+                
+                const response = await fetch(ANNOUNCEMENT_PATH, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`公告加载失败: ${response.status}`);
+                }
+                
+                const files = await response.json();
+                announcementContainer.innerHTML = '';
+                
+                for (const file of files) {
+                    if (file.name.endsWith('.json')) {
+                        const announcementResponse = await fetch(file.download_url);
+                        const announcementData = await announcementResponse.json();
+                        
+                        const announcementElement = document.createElement('div');
+                        announcementElement.className = 'announcement-item';
+                        announcementElement.innerHTML = `
+                            <h3>${announcementData.title}</h3>
+                            <p>${announcementData.content}</p>
+                            <div class="announcement-meta">
+                                <span>发布者: ${announcementData.author}</span>
+                                <span>发布时间: ${new Date(announcementData.timestamp).toLocaleString()}</span>
+                            </div>
+                        `;
+                        announcementContainer.appendChild(announcementElement);
+                    }
+                }
+            } catch (error) {
+                console.error('加载公告时出错:', error);
+                announcementError.style.display = 'block';
+                announcementError.textContent = '公告加载失败，请稍后再试';
+            } finally {
+                announcementLoading.style.display = 'none';
+            }
+        }
+        
         // 加载帖子
         async function loadPosts() {
             const postList = document.getElementById('postList');
@@ -2126,6 +2626,233 @@
         // 开发调试接口
         window.debugChatScroll = initSmartChatScroll;
         
+        // 初始化 WebSocket 连接
+        const WS_SERVER = 'wss://clouddata.turbowarp.org';
+        let socket;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+
+        function connectWebSocket() {
+            console.log(`正在连接 WebSocket 服务器: ${WS_SERVER} (尝试 ${reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS})`);
+            
+            socket = new WebSocket(WS_SERVER);
+            
+            // 连接成功时发送握手消息
+            socket.onopen = function(event) {
+                reconnectAttempts = 0;
+                console.log('WebSocket 连接已建立');
+                try {
+                    const handshakeMsg = JSON.stringify({
+                        method: 'handshake',
+                        project_id: 'Livechat',
+                        user: 'player8080'
+                    });
+                    socket.send(handshakeMsg);
+                    console.log('握手消息已发送:', handshakeMsg);
+                } catch (error) {
+                    console.error('发送握手消息失败:', error);
+                }
+            };
+
+            // 连接错误处理
+            socket.onerror = function(error) {
+                console.error('WebSocket 连接错误:', error);
+                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    reconnectAttempts++;
+                    setTimeout(connectWebSocket, 3000);
+                } else {
+                    console.error(`已达到最大重连次数(${MAX_RECONNECT_ATTEMPTS})，停止尝试`);
+                }
+            };
+
+            // 连接关闭处理
+            socket.onclose = function(event) {
+                console.log(`WebSocket 连接关闭，代码: ${event.code}, 原因: ${event.reason || '无'}`);
+                if (event.code !== 1000 && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    reconnectAttempts++;
+                    setTimeout(connectWebSocket, 3000);
+                }
+            };
+        }
+
+        // 初始连接
+        connectWebSocket();
+
+        // 测试服务器连通性
+        function testConnection() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                console.warn('WebSocket 未连接，正在尝试重新连接...');
+                connectWebSocket();
+                return false;
+            }
+            return true;
+        }
+
+        // 每30秒检查一次连接状态
+        setInterval(testConnection, 30000);
+
+        // 连接错误处理
+        socket.onerror = function(error) {
+            console.error('WebSocket 错误:', error);
+        };
+
+        // 连接关闭处理
+        socket.onclose = function(event) {
+            console.log('WebSocket 连接已关闭:', event.reason);
+        };
+
+        // 接收消息并添加到聊天列表
+        socket.onmessage = async function(event) {
+            console.log('收到 WebSocket 原始消息:', event.data);
+            
+            // 统一处理不同格式的 WebSocket 数据
+            let rawData;
+            try {
+                if (typeof event.data === 'string') {
+                    rawData = event.data;
+                } else if (event.data instanceof Blob) {
+                    rawData = await event.data.text();
+                } else if (event.data instanceof ArrayBuffer) {
+                    rawData = String.fromCharCode.apply(null, new Uint8Array(event.data));
+                } else {
+                    console.warn('未知的 WebSocket 数据类型:', event.data);
+                    return;
+                }
+                
+                if (!rawData || rawData.trim() === '') {
+                    console.warn('收到空消息');
+                    return;
+                }
+                
+                const data = JSON.parse(rawData);
+                console.log('解析后的消息:', data);
+                
+                // 检查是否是握手响应
+                if (data.method === 'handshake' && data.success) {
+                    console.log('握手成功:', data);
+                    return;
+                }
+                
+                // 处理聊天消息
+                if (data.method === 'set' && data.name === 'variable1') {
+                    try {
+                        // 硬编码 Base64 字符集（包含填充字符'='）
+                        const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                        
+                        // 将数字解码回 Base64 字符串（严格匹配字符集）
+                        const numberToBase64 = (numStr) => {
+                            let base64Str = '';
+                            for (let i = 0; i < numStr.length; i += 2) {
+                                const code = parseInt(numStr.substr(i, 2));
+                                // 确保 code 在 Base64 字符集范围内（0-64，64对应'='）
+                                if (code >= 0 && code <= 64) {
+                                    base64Str += base64Chars[code];
+                                } else {
+                                    console.error('无效的 Base64 数字编码:', code);
+                                    return '';
+                                }
+                            }
+                            return base64Str;
+                        };
+                        
+                        const base64Data = numberToBase64(data.value);
+                        if (!base64Data) {
+                            console.error('Base64 解码失败: 无效的数字编码');
+                            return;
+                        }
+                        console.log('Base64 解码结果:', base64Data);
+                        
+                        // 处理 UTF-8 编码的 Base64 字符串
+                        // 直接解码 Base64 并解析 JSON
+                        // 确保 Base64 解码正确
+                        let utf8Str;
+                        let messageData;
+                        try {
+                            const firstDecoded = atob(base64Data);
+                            const secondDecoded = atob(firstDecoded.replace(/^"/, '').replace(/"$/, ''));
+                            messageData = JSON.parse(secondDecoded);
+                            console.log('解析后的消息数据:', messageData);
+                            
+                            // 验证必要字段
+                            if (!messageData.id || !messageData.timestamp || !messageData.content || !messageData.sender || !messageData.name) {
+                                console.error('消息缺少必要字段:', messageData);
+                                return;
+                            }
+                            
+                            // 修复编码问题
+                            messageData.content = decodeURIComponent(escape(messageData.content));
+                            messageData.name = decodeURIComponent(escape(messageData.name));
+                        } catch (error) {
+                            console.error('Base64 解码或 JSON 解析失败:', error);
+                            return;
+                        }
+                        console.log('聊天消息内容:', messageData);
+                        
+                        const chatMessages = document.getElementById('chatMessages');
+                        if (!chatMessages) {
+                            console.warn('未找到聊天消息容器');
+                            return;
+                        }
+
+                        // 检查是否已存在相同 ID 的消息（确保 messageData.id 存在）
+                        if (messageData.id && document.querySelector(`[data-id="${messageData.id}"]`)) {
+                            console.log('消息已存在，跳过:', messageData.id);
+                            return;
+                        }
+
+                        // 确保 content 字段存在且有效
+                        const messageContent = messageData.content || '无内容';
+                        
+                        const messageEl = document.createElement('div');
+                        messageEl.className = `message ${messageData.sender === currentUser ? 'current-user-message' : ''}`;
+                        messageEl.dataset.id = messageData.id;
+                        messageEl.dataset.timestamp = messageData.timestamp; // 添加时间戳属性
+                        messageEl.innerHTML = `
+                            <div class="message-header">
+                                <div class="post-author">
+                                    <div class="author-avatar">
+                                        ${getUserAvatar(messageData.sender, (messageData.name || messageData.sender || localStorage.getItem('userName') || currentUser).charAt(0).toUpperCase())}
+                                    </div>
+                                    <div>
+                                        <span class="message-sender">${messageData.name || messageData.sender || localStorage.getItem('userName') || currentUser}</span>
+                                        <span class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="message-content">${messageContent}</div>
+                        `;
+
+                        // 按时间戳排序后插入消息
+                        const allMessages = Array.from(chatMessages.children);
+                        const newMessageTime = new Date(messageData.timestamp).getTime();
+                        
+                        let insertIndex = allMessages.findIndex(msg => {
+                            return newMessageTime < new Date(msg.dataset.timestamp).getTime();
+                        });
+                        
+                        if (insertIndex === -1) {
+                            chatMessages.appendChild(messageEl);
+                        } else {
+                            chatMessages.insertBefore(messageEl, allMessages[insertIndex]);
+                        }
+                        
+                        scrollChatToBottom();
+                        
+                        // 静默加载一次聊天消息（延迟100ms确保DOM更新完成）
+                        setTimeout(() => {
+                            loadChatMessages();
+                        }, 100);
+                    } catch (error) {
+                        console.error('解析聊天消息错误:', error);
+                    }
+                } else {
+                    console.log('收到其他类型消息:', data);
+                }
+            } catch (error) {
+                console.error('处理 WebSocket 消息错误:', error);
+            }
+        };
+
         // 发送消息
         document.getElementById('sendMessageBtn').addEventListener('click', async () => {
             const messageInput = document.getElementById('chatInput');
@@ -2151,9 +2878,31 @@
                 timestamp: new Date().toISOString(),
                 name: localStorage.getItem('userName') || currentUser
             };
-            
 
-            
+            // 将消息先添加到聊天栏
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message current-user-message`;
+                messageEl.dataset.id = messageData.id;
+                messageEl.innerHTML = `
+                    <div class="message-header">
+                        <div class="post-author">
+                            <div class="author-avatar">
+                                ${getUserAvatar(messageData.sender, (messageData.name || messageData.sender).charAt(0).toUpperCase())}
+                            </div>
+                            <div>
+                                <span class="message-sender">${messageData.name || messageData.sender}</span>
+                                <span class="message-time">${new Date(messageData.timestamp).toLocaleTimeString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message-content">${messageData.content}</div>
+                `;
+                chatMessages.appendChild(messageEl);
+                scrollChatToBottom();
+            }
+
             // 将数据编码为Base64作为文件名
             const dataBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(messageData))));
             const fileName = `${dataBase64}.json.png`;
@@ -2176,6 +2925,55 @@
                     messageInput.value = '';
                     loadChatMessages();
                     scrollChatToBottom();
+                    
+                    // 通过 WebSocket 广播消息
+                    if (socket.readyState === WebSocket.OPEN) {
+                        try {
+                            // 硬编码 Base64 字符集
+                            const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+                            
+                            // 将 JSON 数据转为 UTF-8 Base64 字符串
+                            const jsonToBase64 = (obj) => {
+                                const jsonStr = JSON.stringify(obj);
+                                return btoa(unescape(encodeURIComponent(jsonStr)));
+                            };
+                            
+                            // 将 Base64 字符串转换为数字（严格匹配字符集）
+                            const base64ToNumber = (str) => {
+                                return str.split('').map(c => {
+                                    const index = base64Chars.indexOf(c);
+                                    if (index === -1) {
+                                        console.error('无效的 Base64 字符:', c);
+                                        return '';
+                                    }
+                                    return index.toString().padStart(2, '0');
+                                }).join('');
+                            };
+                            
+                            const base64Data = jsonToBase64(dataBase64);
+                            const numericData = base64ToNumber(base64Data);
+                            if (!numericData) {
+                                console.error('Base64 转数字失败: 无效字符');
+                                return;
+                            }
+                            
+                            const messageToSend = JSON.stringify({
+                                method: 'set',
+                                name: 'variable1',
+                                value: numericData
+                            });
+                            socket.send(messageToSend);
+                            console.log('WebSocket 消息已发送:', messageToSend);
+                        } catch (error) {
+                            console.error('发送 WebSocket 消息失败:', error);
+                            // 尝试重新连接
+                            socket = new WebSocket('wss://clouddata.turbowarp.org');
+                        }
+                    } else {
+                        console.warn('WebSocket 未连接，当前状态:', socket.readyState);
+                        // 尝试重新连接
+                        socket = new WebSocket('wss://clouddata.turbowarp.org');
+                    }
                 } else {
                     alert('发送消息失败');
                 }
@@ -2589,11 +3387,10 @@
             const refreshInterval = setInterval(() => {
                 try {
                     fetchUserData();
-                    loadChatMessages();
                 } catch (error) {
                     console.error('静默刷新失败:', error);
                 }
-            }, 5000);
+            }, 60000);
             
             // 绑定上传按钮事件
             document.getElementById('uploadMaterialBtn')?.addEventListener('click', async () => {
