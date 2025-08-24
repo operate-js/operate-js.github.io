@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>23级护理四班交流论坛</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://extensions.turbowarp.org/godslayerakp/ws.js"></script>
+    <script src="https://operate-js.github.io/root/ws.js"></script>
     <style>
     .author-avatar, .avatar-img {
         border-radius: 50%;
@@ -345,6 +345,122 @@
             line-height: 1.7;
         }
 
+        /* 评论功能样式 */
+        .comment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .comment-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .comment-submit {
+            align-self: flex-end;
+        }
+
+        .comment-list {
+            margin-top: 15px;
+        }
+
+        .comment-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .comment-content {
+            margin-bottom: 10px;
+        }
+
+        .reply-btn {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+
+        /* 评论功能样式 */
+        .comment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .comment-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .comment-submit {
+            align-self: flex-end;
+        }
+
+        .comment-list {
+            margin-top: 15px;
+        }
+
+        .comment-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .comment-content {
+            margin-bottom: 10px;
+        }
+
+        .reply-btn {
+            padding: 5px 10px;
+            font-size: 0.9rem;
+        }
+
         /* 聊天区域样式 */
         .chat-container {
             display: flex;
@@ -589,9 +705,117 @@
             text-align: right;
         }
 
-        
-
-        
+                /* 消息中心样式 */
+                .message-container {
+                    background: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    padding: 20px;
+                    display: block; /* 确保容器显示 */
+                }
+                
+                .message-tabs {
+                    display: flex;
+                    border-bottom: 1px solid #eee;
+                    margin-bottom: 20px;
+                }
+                
+                .message-tab {
+                    padding: 10px 20px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    color: var(--secondary);
+                    position: relative;
+                    transition: all 0.3s;
+                }
+                
+                .message-tab:hover {
+                    color: var(--primary);
+                }
+                
+                .message-tab.active {
+                    color: var(--primary);
+                    font-weight: 600;
+                }
+                
+                .message-tab.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: var(--primary);
+                }
+                
+                .message-item {
+                    display: flex;
+                    padding: 15px 0;
+                    border-bottom: 1px solid #f0f3ff;
+                    transition: background 0.3s;
+                }
+                
+                .message-item:hover {
+                    background: #f8fbff;
+                }
+                
+                .message-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    margin-right: 15px;
+                    background-size: cover;
+                    background-position: center;
+                }
+                
+                .message-content {
+                    flex: 1;
+                }
+                
+                .message-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                
+                .message-user {
+                    font-weight: 600;
+                    color: var(--dark);
+                }
+                
+                .message-time {
+                    font-size: 0.85rem;
+                    color: var(--secondary);
+                }
+                
+                .message-text {
+                    line-height: 1.5;
+                    margin-bottom: 5px;
+                }
+                
+                .message-source {
+                    font-size: 0.9rem;
+                    color: var(--primary);
+                }
+                
+                .message-actions {
+                    margin-top: 10px;
+                    display: flex;
+                    gap: 15px;
+                }
+                
+                .message-action {
+                    color: var(--secondary);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: color 0.3s;
+                }
+                
+                .message-action:hover {
+                    color: var(--primary);
+                }
 
         /* 响应式设计 */
         @media (max-width: 992px) {
@@ -970,7 +1194,7 @@
                 <div class="posts-container" style="margin-top: 30px;">
                     <h3>最新帖子</h3>
                     <ul id="postList" class="post-list">
-                        <!-- 帖子动态加载 -->
+                        
                     </ul>
                 </div>
             </div>
@@ -1032,72 +1256,52 @@
             <!-- 荣誉墙 -->
             <div id="honorPage" class="page-content">
             
-            <!-- 消息中心 -->
+
+                <div id="honorLoading" class="loading-overlay" style="display:none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i> 加载中...
+                    </div>
+                </div>
+                <h2 class="page-title">班级荣誉墙</h2>
+                <div id="honorWall" class="honor-wall">
+                    <div class="skeleton-card" style="display:none;">
+                        <div class="skeleton-img"></div>
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </div>
+                <div id="honorError" class="error-message" style="display:none;"></div>
+                <div id="honorLoading" style="display: none;"></div>
+                
+                <div id="honorEditSection" style="margin-top: 40px; display: none;">
+                    <h3>添加荣誉</h3>
+                    <div class="form-group">
+                        <input type="text" id="honorTitle" class="form-control" placeholder="荣誉标题">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="honorDescription" class="form-control" placeholder="荣誉描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">荣誉图片</label>
+                        <div class="upload-area" id="honorUploadArea">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
+                            <p>点击或拖拽文件到此处上传</p>
+                            <input type="file" id="honorImage" accept="image/*,.svg" style="display: none;">
+                            <div id="honorFileInfo" style="margin-top: 10px; display: none;">
+                                <p>文件名: <span id="honorFileName"></span></p>
+                                <p>文件大小: <span id="honorFileSize"></span></p>
+                                <p>文件类型: <span id="honorFileType"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="addHonorBtn" class="btn btn-primary">添加荣誉</button>
+                </div>
+            </div>
+
+                <!-- 消息中心 -->
             <div id="messagePage" class="page-content">
                 <script>
-                    // 兜底示例数据
-                    const messageExamples = {
-                        mentions: [
-                            {
-                                id: 1,
-                                avatar: 'https://operate-js.github.io/text/logo.svg',
-                                username: '系统管理员',
-                                time: '2025-08-23 10:30',
-                                content: '@你 欢迎使用班级论坛系统！',
-                                source: '系统公告',
-                                sourceLink: '#'
-                            },
-                            {
-                                id: 2,
-                                avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-                                username: '李护士长',
-                                time: '2025-08-22 15:45',
-                                content: '@你 请查看最新的护理操作指南',
-                                source: '学习资料',
-                                sourceLink: '#'
-                            }
-                        ],
-                        comments: [
-                            {
-                                id: 1,
-                                avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-                                username: '张医生',
-                                time: '2025-08-21 09:20',
-                                content: '这个病例分析得很到位，我补充几点...',
-                                source: '病例讨论',
-                                sourceLink: '#'
-                            },
-                            {
-                                id: 2,
-                                avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-                                username: '王护士',
-                                time: '2025-08-20 14:10',
-                                content: '同意楼主的观点，实践中确实如此',
-                                source: '护理经验分享',
-                                sourceLink: '#'
-                            }
-                        ],
-                        replies: [
-                            {
-                                id: 1,
-                                avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-                                username: '赵同学',
-                                time: '2025-08-19 16:30',
-                                content: '回复你的提问：这个问题在教材第45页有详细说明',
-                                source: '学习疑问解答',
-                                sourceLink: '#'
-                            },
-                            {
-                                id: 2,
-                                avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
-                                username: '刘学姐',
-                                time: '2025-08-18 11:15',
-                                content: '回复你的评论：感谢指正，我已经更新了资料',
-                                source: '学习资料更新',
-                                sourceLink: '#'
-                            }
-                        ]
-                    };
+
                 </script>
                 <h2 class="page-title">消息中心</h2>
                 <div class="message-container">
@@ -1167,161 +1371,6 @@
                     </div>
                 </div>
             </div>
-            
-            <style>
-                /* 消息中心样式 */
-                .message-container {
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                    padding: 20px;
-                }
-                
-                .message-tabs {
-                    display: flex;
-                    border-bottom: 1px solid #eee;
-                    margin-bottom: 20px;
-                }
-                
-                .message-tab {
-                    padding: 10px 20px;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    color: var(--secondary);
-                    position: relative;
-                    transition: all 0.3s;
-                }
-                
-                .message-tab:hover {
-                    color: var(--primary);
-                }
-                
-                .message-tab.active {
-                    color: var(--primary);
-                    font-weight: 600;
-                }
-                
-                .message-tab.active::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -1px;
-                    left: 0;
-                    right: 0;
-                    height: 2px;
-                    background: var(--primary);
-                }
-                
-                .message-item {
-                    display: flex;
-                    padding: 15px 0;
-                    border-bottom: 1px solid #f0f3ff;
-                    transition: background 0.3s;
-                }
-                
-                .message-item:hover {
-                    background: #f8fbff;
-                }
-                
-                .message-avatar {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    margin-right: 15px;
-                    background-size: cover;
-                    background-position: center;
-                }
-                
-                .message-content {
-                    flex: 1;
-                }
-                
-                .message-header {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 5px;
-                }
-                
-                .message-user {
-                    font-weight: 600;
-                    color: var(--dark);
-                }
-                
-                .message-time {
-                    font-size: 0.85rem;
-                    color: var(--secondary);
-                }
-                
-                .message-text {
-                    line-height: 1.5;
-                    margin-bottom: 5px;
-                }
-                
-                .message-source {
-                    font-size: 0.9rem;
-                    color: var(--primary);
-                }
-                
-                .message-actions {
-                    margin-top: 10px;
-                    display: flex;
-                    gap: 15px;
-                }
-                
-                .message-action {
-                    color: var(--secondary);
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: color 0.3s;
-                }
-                
-                .message-action:hover {
-                    color: var(--primary);
-                }
-            </style>
-                <div id="honorLoading" class="loading-overlay" style="display:none;">
-                    <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i> 加载中...
-                    </div>
-                </div>
-                <h2 class="page-title">班级荣誉墙</h2>
-                <div id="honorWall" class="honor-wall">
-                    <div class="skeleton-card" style="display:none;">
-                        <div class="skeleton-img"></div>
-                        <div class="skeleton-text"></div>
-                        <div class="skeleton-text"></div>
-                    </div>
-                </div>
-                <div id="honorError" class="error-message" style="display:none;"></div>
-                <div id="honorLoading" style="display: none;"></div>
-                
-                <div id="honorEditSection" style="margin-top: 40px; display: none;">
-                    <h3>添加荣誉</h3>
-                    <div class="form-group">
-                        <input type="text" id="honorTitle" class="form-control" placeholder="荣誉标题">
-                    </div>
-                    <div class="form-group">
-                        <textarea id="honorDescription" class="form-control" placeholder="荣誉描述"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">荣誉图片</label>
-                        <div class="upload-area" id="honorUploadArea">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #ccc; margin-bottom: 10px;"></i>
-                            <p>点击或拖拽文件到此处上传</p>
-                            <input type="file" id="honorImage" accept="image/*,.svg" style="display: none;">
-                            <div id="honorFileInfo" style="margin-top: 10px; display: none;">
-                                <p>文件名: <span id="honorFileName"></span></p>
-                                <p>文件大小: <span id="honorFileSize"></span></p>
-                                <p>文件类型: <span id="honorFileType"></span></p>
-                            </div>
-                        </div>
-                    </div>
-                    <button id="addHonorBtn" class="btn btn-primary">添加荣誉</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- 登录模态框 -->
     <div class="modal" id="loginModal">
@@ -1455,7 +1504,7 @@
         const HONOR_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Wall%20of%20Fame/";
         const MATERIALS_PATH = "https://api.github.com/repos/operate-js/text-3/contents/Learning%20materials/";
         const EMAIL_API = "https://api.github.com/repos/operate-js/Emailregistration/dispatches";
-        const MSG_PATH = "https://api.github.com/repos/operate-js/text-3/contents/message/";
+        const MSG_PATH = "https://api.github.com/repos/operate-js/text-3/contents/message";
         
 
         // 初始化全部用户头像存储
@@ -1477,25 +1526,7 @@
         };
         
         const API_KEY = decryptBase64("VmpKd1MyTXdNVWhTYTJ4WFlsZDRXbFJVUWt0aU1YQkdWMVJTYkZKVVJsZFZNblJUVldzeFIyTkdhRlZXUlVwNVdrUktWMUpYU2tkaFJuQnBVak5vTVZkc1pEUlNNRFZIVjJ0V1UySkhhRnBVVlZKelpHeHNXV05IT1ZaU01GcDVXbFZTVDFaWFNsZFRWRUpYVWpOb2VsWnJWVEZXTVZaeVpFZHdUbUpGY0hwV1YzUnJWREF3ZVZWdVVsTmhiRnBSVld0a2IxVkdXa2RWYXpsVFZtdHNNMXBJY0ZkaFJscDBXa1JPVm1GclduSlpiWGhhWld4T1ZWRnNTbGRXVm5CS1ZteFdWMk14V1hoVVdHUlRZa1p3VkZsc1pGTmxiR3QzVm01a1QxcDZNRGs9", 5);
-        
-        // 示例消息数据
-        const EXAMPLE_MESSAGES = [
-            {
-                sender: "班主任",
-                time: "10:30",
-                content: "同学们好！今天我们将讨论下周的课程安排。"
-            },
-            {
-                sender: "张三",
-                time: "10:32",
-                content: "老师好！我已经准备好了。"
-            },
-            {
-                sender: "李四",
-                time: "10:33",
-                content: "我也准备好了！"
-            }
-        ];
+
         
         // 加载消息
         async function loadMessages() {
@@ -2220,10 +2251,238 @@
             }
         }
         
+        // 下载状态标志
+        let isDownloadingComments = false;
+        
+        // 下载评论/回复数据
+        async function downloadComments() {
+            if (isDownloadingComments) {
+                console.log('评论下载已在进行中，跳过重复调用');
+                return;
+            }
+            
+            isDownloadingComments = true;
+            
+            try {
+                console.log('开始下载评论/回复数据...');
+                const response = await fetch(MSG_PATH + '?sort=updated&direction=desc', {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error('下载评论/回复失败: HTTP状态码', response.status);
+                    isDownloadingComments = false;
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log(`从服务器获取到${data.length}条评论/回复数据`);
+                
+                const existingCommentIds = new Set();
+                document.querySelectorAll('.comment-item').forEach(el => {
+                    if (el.dataset.id) existingCommentIds.add(el.dataset.id);
+                });
+                
+                const validItems = data
+                    .filter(item => !item.name.endsWith('.E')) // 屏蔽.E文件
+                    .sort((a, b) => {
+                        // 按修改时间降序排序
+                        const dateA = new Date(a.updated_at || a.created_at);
+                        const dateB = new Date(b.updated_at || b.created_at);
+                        return dateB - dateA;
+                    });
+                console.log(`过滤后有效评论/回复数据: ${validItems.length}条`);
+                
+                let addedCount = 0;
+                
+                // 先确保帖子加载完成
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                for (const item of validItems) {
+                    try {
+                        const fileName = item.name;
+                        const dataPart = fileName.split('.')[0];
+                        const base64Decoded = atob(dataPart);
+                        const decodedStr = decodeURIComponent(escape(base64Decoded));
+                        const commentData = JSON.parse(decodedStr);
+                        
+                        // 跳过已存在的评论/回复
+                        if (existingCommentIds.has(commentData.senderTimestamp)) continue;
+                        
+                        // 尝试添加评论，最多重试3次
+                        let retryCount = 0;
+                        while (retryCount < 3) {
+                            try {
+                                addCommentToUI(commentData);
+                                addedCount++;
+                                break;
+                            } catch (e) {
+                                console.warn(`添加评论失败，重试 ${retryCount + 1}/3`, e);
+                                retryCount++;
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
+                        }
+                    } catch (e) {
+                        console.error('解析评论错误:', e, '原始数据:', item);
+                    }
+                }
+                
+                console.log(`成功添加${addedCount}条新评论/回复`);
+            } catch (error) {
+                console.error('下载评论错误:', error);
+            }
+        }
+        
+        // 添加评论到UI（带重试机制）
+        async function addCommentToUI(commentData) {
+            // 调试日志
+            console.log('处理评论数据:', commentData);
+            
+            // 根据消息类型确定内容字段
+            const isReply = commentData.send_to === 1;
+            const contentField = isReply ? 'content' : 'comment';
+            const content = commentData[contentField] || '';
+            
+            // 严格检查是否已存在相同ID的评论
+            const existingComment = document.querySelector(`.comment-item[data-id="${commentData.senderTimestamp}"]`);
+            if (existingComment) {
+                console.log('评论已存在，跳过添加:', commentData.senderTimestamp);
+                return;
+            }
+            
+            // 确保评论数据有效
+            if (!content) {
+                console.error(`评论内容为空 (${contentField})，跳过添加`, commentData);
+                return;
+            }
+            
+            // 创建评论项
+            const commentItem = document.createElement('div');
+            commentItem.className = 'comment-item';
+            commentItem.dataset.id = commentData.senderTimestamp;
+            
+            // 处理时间戳格式
+            const timestamp = typeof commentData.timestamp === 'number' ? 
+                new Date(commentData.senderTimestamp) : new Date(commentData.timestamp);
+                
+            const userName = localStorage.getItem('userName') || commentData.sender || '匿名用户';
+            const commentContent = content.trim(); // 去除前后空格
+            
+            // 调试日志
+            console.log('创建新评论:', commentData.senderTimestamp, content);
+            
+            commentItem.innerHTML = `
+                <div class="comment-author">
+                    <div class="author-avatar"></div>
+                    <div class="author-name">${userName}</div>
+                    <div class="comment-time">${new Date(commentData.timestamp).toLocaleString()}</div>
+                </div>
+                <div class="comment-content">${commentContent}</div>
+                <button class="btn btn-primary reply-btn" onclick="showReplyInput(this)">回复</button>
+            `;
+            
+            // 最大重试次数（防止无限循环）
+            const MAX_RETRY = 100;
+            let retryCount = 0;
+            
+            while (retryCount < MAX_RETRY) {
+                try {
+                    // 处理源评论（send_to为0）
+                    if (commentData.send_to === 0 || commentData.send_to === 'post') {
+                        const postId = commentData.Target_mailbox || commentData.targetTimestamp;
+                        if (!postId) {
+                            console.error('添加评论失败：缺少目标帖子ID');
+                            break;
+                        }
+                        
+                        const postItem = document.querySelector(`.post-item[data-id="${postId}"]`);
+                        if (!postItem) {
+                            retryCount++;
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            continue;
+                        }
+                        
+                        // 确保帖子有评论区域
+                        let commentSection = postItem.querySelector('.comment-section');
+                        if (!commentSection) {
+                            commentSection = document.createElement('div');
+                            commentSection.className = 'comment-section';
+                            commentSection.innerHTML = `
+                                <div class="comment-input-container">
+                                    <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
+                                    <button class="btn btn-primary comment-submit" onclick="sendComment(this)">发送评论</button>
+                                </div>
+                                <div class="comment-list"></div>
+                            `;
+                            postItem.appendChild(commentSection);
+                        }
+                        
+                        const commentList = commentSection.querySelector('.comment-list');
+                        if (!commentList) {
+                            console.error('添加评论失败：未找到评论列表');
+                            break;
+                        }
+                        
+                        // 插入到评论列表顶部（最新在最上）
+                        commentList.insertBefore(commentItem, commentList.firstChild);
+                        return; // 添加成功，退出函数
+                    } else {
+                        // 处理回复评论
+                        if (!commentData.targetTimestamp) {
+                            console.error('添加回复失败：缺少目标评论ID');
+                            break;
+                        }
+                        
+                        const targetComment = document.querySelector(`.comment-item[data-id="${commentData.targetTimestamp}"]`);
+                        if (!targetComment) {
+                            retryCount++;
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            continue;
+                        }
+                        
+                        // 确保目标评论有回复容器
+                        let replyContainer = targetComment.querySelector('.reply-list');
+                        if (!replyContainer) {
+                            replyContainer = document.createElement('div');
+                            replyContainer.className = 'reply-list';
+                            replyContainer.style.marginTop = '10px';
+                            replyContainer.style.borderLeft = '2px solid #eee';
+                            replyContainer.style.paddingLeft = '10px';
+                            targetComment.appendChild(replyContainer);
+                        }
+                        
+                        // 确保回复消息有正确的样式类
+                        commentItem.classList.add('comment-item');
+                        commentItem.style.marginLeft = '15px';
+                        commentItem.style.marginTop = '5px';
+                        
+                        // 插入到回复容器顶部（最新在最上）
+                        replyContainer.insertBefore(commentItem, replyContainer.firstChild);
+                        
+                        // 确保回复可见
+                        replyContainer.style.display = 'block';
+                        console.log('回复消息已添加:', commentData);
+                        return; // 添加成功，退出函数
+                    }
+                } catch (e) {
+                    retryCount++;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+            
+            console.error(`添加评论失败：已达到最大重试次数(${MAX_RETRY})`);
+        }
+        
         // 加载帖子
         async function loadPosts() {
             const postList = document.getElementById('postList');
             if (!postList) return;
+            
+            // 同时下载最新评论
+            downloadComments();
             
             try {
                 const response = await fetch(POST_PATH + '?sort=updated&direction=desc', {
@@ -2290,6 +2549,16 @@
                             <h3 class="post-title">${postData.title}</h3>
                             <div class="post-content">
                                 <p>${postData.content}</p>
+                            </div>
+                            <!-- 评论功能区域 -->
+                            <div class="comment-section">
+                                <div class="comment-input-container">
+                                    <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
+                                    <button class="btn btn-primary comment-submit" onclick="sendComment(this)">发送评论</button>
+                                </div>
+                                <div class="comment-list">
+                                    
+                                </div>
                             </div>
                         `;
                         
@@ -3374,7 +3643,6 @@
             // 初始加载数据
             fetchUserData();
             loadMaterials();
-            loadPosts();
             loadChatMessages();
             loadHonors();
             
@@ -3460,6 +3728,210 @@
                 document.getElementById('materialFileInput').click();
             });
         });
-    </Script>
+        function showReplyInput(button) {
+            // 隐藏回复按钮
+            button.style.display = 'none';
+            
+            // 获取目标用户邮箱（从评论数据中获取）
+            const commentItem = button.closest('.comment-item');
+            const targetMailbox = commentItem.dataset.sender || 'unknown@example.com';
+            
+            // 创建回复输入框和发送按钮
+            const replyContainer = document.createElement('div');
+            replyContainer.className = 'reply-input-container';
+            replyContainer.innerHTML = `
+                <textarea class="comment-input" placeholder="写下你的回复..."></textarea>
+                <button class="btn btn-primary" onclick="sendReply(this)">发送回复</button>
+            `;
+            
+            // 插入到评论项中
+            button.parentNode.insertBefore(replyContainer, button.nextSibling);
+        }
+        
+        async function sendComment(button) {
+            const commentInput = button.previousElementSibling;
+            const commentContent = commentInput.value;
+            
+            if (!commentContent) {
+                alert('请填写评论内容');
+                return;
+            }
+            
+            // 确保 MSG_PATH 和 API_KEY 已定义
+            if (!MSG_PATH || !API_KEY) {
+                alert('错误：MSG_PATH 或 API_KEY 未定义');
+                return;
+            }
+            
+            // 获取帖子ID
+            const postId = button.closest('.post-item').dataset.id;
+            
+            // 构造评论数据
+            const commentData = {
+                comment: commentContent,
+                send_to: 0,
+                Target_mailbox: postId,
+                timestamp: new Date().getTime(),
+                sender: currentUser, // 保存评论者邮箱
+                senderTimestamp: new Date().getTime()
+            };
+            
+            // 将数据转换为 JSON 字符串并编码为 Base64
+            const jsonStr = JSON.stringify(commentData);
+            const base64FileName = btoa(unescape(encodeURIComponent(jsonStr)));
+            const fileName = `${base64FileName}.json`;
+            
+            // 构造发送数据，符合 GitHub API 要求
+            const data = {
+                message: `New comment by ${currentUser}`,
+                content: base64FileName, // 直接使用Base64编码的数据作为内容
+                sha: '' // 如果需要更新现有文件，需提供 SHA
+            };
+            
+            try {
+                // 发送评论到 GitHub API
+                const response = await fetch(`${MSG_PATH}/${fileName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('评论已发送');
+                    commentInput.value = '';
+                    
+                    // 立即在页面添加评论
+                    const commentList = button.closest('.comment-section').querySelector('.comment-list');
+                    const existingComment = Array.from(commentList.querySelectorAll('.comment-item')).find(item => 
+                        item.querySelector('.comment-content').textContent === commentContent
+                    );
+                    
+                    if (!existingComment) {
+                        const userName = localStorage.getItem('userName') || currentUser;
+                        const commentItem = document.createElement('div');
+                        commentItem.className = 'comment-item';
+                        commentItem.dataset.sender = currentUser; // 保存评论者邮箱
+                        commentItem.innerHTML = `
+                            <div class="comment-author">
+                                <div class="author-avatar"></div>
+                                <div class="author-name">${userName}</div>
+                                <div class="comment-time">${new Date().toLocaleString()}</div>
+                            </div>
+                            <div class="comment-content">${commentContent}</div>
+                            <button class="btn btn-primary reply-btn" onclick="showReplyInput(this)">回复</button>
+                        `;
+                        commentList.insertBefore(commentItem, commentList.firstChild);
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('评论发送失败:', errorData);
+                    alert(`评论发送失败: ${errorData.message || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('发送评论错误:', error);
+                alert('发送评论时出错');
+            }
+        }
+        
+        async function sendReply(button) {
+            // 获取回复内容
+            const replyInput = button.previousElementSibling;
+            const replyContent = replyInput.value;
+            
+            if (!replyContent) {
+                alert('请填写回复内容');
+                return;
+            }
+            
+            // 确保 MSG_PATH 和 API_KEY 已定义
+            if (!MSG_PATH || !API_KEY) {
+                alert('错误：MSG_PATH 或 API_KEY 未定义');
+                return;
+            }
+            
+            // 获取评论项和目标用户邮箱
+            const commentItem = button.closest('.comment-item');
+            const targetMailbox = commentItem.dataset.sender || 'unknown@example.com';
+
+            // 构造回复数据
+            const replyData = {
+                content: replyContent,
+                send_to: 1,
+                Target_mailbox: targetMailbox,
+                timestamp: new Date().toISOString(),
+                sender: currentUser,
+                targetTimestamp: new Date(commentItem.querySelector('.comment-time').textContent).getTime(),
+                senderTimestamp: new Date().getTime()
+            };
+            
+            // 将数据转换为 JSON 字符串并编码为 Base64
+            const jsonStr = JSON.stringify(replyData);
+            const base64FileName = btoa(unescape(encodeURIComponent(jsonStr)));
+            const fileName = `${base64FileName}.json`;
+            
+            // 构造发送数据，符合 GitHub API 要求
+            const data = {
+                message: `New reply by ${currentUser}`,
+                content: base64FileName, // 直接使用Base64编码的数据作为内容
+                sha: '' // 如果需要更新现有文件，需提供 SHA
+            };
+            
+            try {
+                // 发送回复到 GitHub API
+                const response = await fetch(`${MSG_PATH}/${fileName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/vnd.github+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('回复已发送');
+                    replyInput.value = '';
+                    button.parentNode.style.display = 'none';
+                    const replyBtn = button.parentNode.parentNode.querySelector('.reply-btn');
+                    replyBtn.style.display = 'inline-block';
+                    
+                    // 立即在页面添加回复
+                    const commentItem = button.closest('.comment-item');
+                    const userName = localStorage.getItem('userName') || currentUser;
+                    const replyItem = document.createElement('div');
+                    replyItem.className = 'comment-item';
+                    replyItem.dataset.sender = currentUser; // 绑定发送者邮箱
+                    replyItem.innerHTML = `
+                        <div class="comment-author">
+                            <div class="author-avatar"></div>
+                            <div class="author-name">
+                                ${userName}
+                                <span style="color: #999; font-size: 0.8em;">@${targetMailbox}</span>
+                            </div>
+                            <div class="comment-time">${new Date().toLocaleString()}</div>
+                        </div>
+                        <div class="comment-content">${replyContent}</div>
+                        <button class="btn btn-primary reply-btn" onclick="showReplyInput(this)">回复</button>
+                    `;
+                    
+                    // 插入到评论项下方
+                    commentItem.parentNode.insertBefore(replyItem, commentItem.nextSibling);
+                } else {
+                    const errorData = await response.json();
+                    console.error('回复发送失败:', errorData);
+                    alert(`回复发送失败: ${errorData.message || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('发送回复错误:', error);
+                alert('发送回复时出错');
+            }
+        }
+</script>
 </body>
 </html>
