@@ -61,6 +61,10 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        html {
+            font-size: 16px;
+        }
 
         body {
             background-color: #f8f9fc;
@@ -102,6 +106,31 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
+        }
+        
+        .message-btn {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
         }
 
         .btn {
@@ -168,20 +197,7 @@
             flex-direction: column;
         }
 
-        /* 消息容器样式 */
-        .sidebar-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            border-top: 1px solid #eee;
-        }
-
-        .sidebar-message {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #f8f9fc;
-            border-radius: 5px;
-        }
+        
 
         .nav-item {
             padding: 12px 20px;
@@ -380,6 +396,26 @@
         .comment-item {
             padding: 12px;
             border-bottom: 1px solid #eee;
+            display: none;
+        }
+        
+        .comment-item:first-child,
+        .comment-item.show {
+            display: block;
+        }
+        
+        .expand-comments {
+            color: var(--primary);
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: none;
+            border: none;
+        }
+        
+        .expand-comments:hover {
+            text-decoration: underline;
         }
 
         .comment-author {
@@ -401,6 +437,19 @@
         .reply-btn {
             padding: 5px 10px;
             font-size: 0.9rem;
+        }
+        
+        .reply-arrow {
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 2px;
+            background-color: #999;
+            border-left: 2px solid #999;
+            transition: all 0.3s ease;
+            z-index: 1;
         }
 
         /* 评论功能样式 */
@@ -438,6 +487,26 @@
         .comment-item {
             padding: 12px;
             border-bottom: 1px solid #eee;
+            display: none;
+        }
+        
+        .comment-item:first-child,
+        .comment-item.show {
+            display: block;
+        }
+        
+        .expand-comments {
+            color: var(--primary);
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: none;
+            border: none;
+        }
+        
+        .expand-comments:hover {
+            text-decoration: underline;
         }
 
         .comment-author {
@@ -459,6 +528,19 @@
         .reply-btn {
             padding: 5px 10px;
             font-size: 0.9rem;
+        }
+        
+        .reply-arrow {
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 2px;
+            background-color: #999;
+            border-left: 2px solid #999;
+            transition: all 0.3s ease;
+            z-index: 1;
         }
 
         /* 聊天区域样式 */
@@ -568,7 +650,86 @@
             position: relative;
         }
 
-        .honor-img {
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            
+            .main-content {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            /* 标题统一调整 */
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .material-header {
+                font-size: 1rem;
+            }
+            
+            .nav-item {
+                font-size: 0.9rem;
+            }
+            
+            /* 帖子内容调整 */
+            .post-item {
+                padding: 15px;
+            }
+            
+            .post-title {
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+            
+            .post-content {
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
+            
+            /* 头像调整 */
+            .author-avatar, .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+            
+            .comment-input {
+                min-height: 70px;
+                font-size: 0.85rem;
+                padding: 8px;
+            }
+            
+            .comment-submit {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .reply-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            
+        }
+            .comment-content {
+
             width: 100%;
             height: 100%;
             background-size: cover;
@@ -705,117 +866,7 @@
             text-align: right;
         }
 
-                /* 消息中心样式 */
-                .message-container {
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                    padding: 20px;
-                    display: block; /* 确保容器显示 */
-                }
                 
-                .message-tabs {
-                    display: flex;
-                    border-bottom: 1px solid #eee;
-                    margin-bottom: 20px;
-                }
-                
-                .message-tab {
-                    padding: 10px 20px;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    color: var(--secondary);
-                    position: relative;
-                    transition: all 0.3s;
-                }
-                
-                .message-tab:hover {
-                    color: var(--primary);
-                }
-                
-                .message-tab.active {
-                    color: var(--primary);
-                    font-weight: 600;
-                }
-                
-                .message-tab.active::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -1px;
-                    left: 0;
-                    right: 0;
-                    height: 2px;
-                    background: var(--primary);
-                }
-                
-                .message-item {
-                    display: flex;
-                    padding: 15px 0;
-                    border-bottom: 1px solid #f0f3ff;
-                    transition: background 0.3s;
-                }
-                
-                .message-item:hover {
-                    background: #f8fbff;
-                }
-                
-                .message-avatar {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    margin-right: 15px;
-                    background-size: cover;
-                    background-position: center;
-                }
-                
-                .message-content {
-                    flex: 1;
-                }
-                
-                .message-header {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 5px;
-                }
-                
-                .message-user {
-                    font-weight: 600;
-                    color: var(--dark);
-                }
-                
-                .message-time {
-                    font-size: 0.85rem;
-                    color: var(--secondary);
-                }
-                
-                .message-text {
-                    line-height: 1.5;
-                    margin-bottom: 5px;
-                }
-                
-                .message-source {
-                    font-size: 0.9rem;
-                    color: var(--primary);
-                }
-                
-                .message-actions {
-                    margin-top: 10px;
-                    display: flex;
-                    gap: 15px;
-                }
-                
-                .message-action {
-                    color: var(--secondary);
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: color 0.3s;
-                }
-                
-                .message-action:hover {
-                    color: var(--primary);
-                }
 
         /* 响应式设计 */
         @media (max-width: 992px) {
@@ -897,6 +948,10 @@
         </div>
         <div class="user-controls">
             <button id="loginBtn" class="btn btn-primary">登录</button>
+            <button class="message-btn">
+                <i class="fas fa-envelope"></i>
+                <div class="unread-badge"></div>
+            </button>
             <div id="userAvatar" class="user-avatar" style="display: none; position: relative; cursor: pointer; overflow: hidden;">
     <span id="avatarInitial">U</span>
     <input type="file" id="avatarUpload" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1000;">
@@ -1120,10 +1175,7 @@
                 <i class="fas fa-trophy"></i>
                 <span>荣誉墙</span>
             </div>
-            <div class="nav-item" data-page="messages" onclick="loadMessages()">
-                <i class="fas fa-envelope"></i>
-                <span>消息</span>
-            </div>
+            
         </div>
 
         <!-- 主内容区 -->
@@ -1211,46 +1263,6 @@
                         <button id="sendMessageBtn" class="btn btn-primary">发送</button>
                     </div>
                 </div>
-                <script>
-
-
-
-                    // 监听回车键
-                    document.getElementById('chatInput').addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') {
-                            document.getElementById('sendMessageBtn').click();
-                        }
-                    });
-                    
-                    // 加载消息页面
-                    function loadMessages() {
-                        try {
-                            // 确保消息页面存在
-                            const messagePage = document.getElementById('messagePage');
-                            if (!messagePage) {
-                                console.error('消息页面元素未找到');
-                                return;
-                            }
-                            
-                            // 安全切换页面
-                            const pages = document.querySelectorAll('.page-content');
-                            if (pages) {
-                                pages.forEach(page => {
-                                    if (page && page.classList) {
-                                        page.classList.remove('active');
-                                    }
-                                });
-                            }
-                            
-                            messagePage.classList.add('active');
-                            
-                            // 这里可以添加消息加载逻辑
-                            console.log('消息页面已加载');
-                        } catch (error) {
-                            console.error('加载消息页面时出错:', error);
-                        }
-                    }
-                </script>
             </div>
 
             <!-- 荣誉墙 -->
@@ -1298,78 +1310,7 @@
                 </div>
             </div>
 
-                <!-- 消息中心 -->
-            <div id="messagePage" class="page-content">
-                <script>
 
-                </script>
-                <h2 class="page-title">消息中心</h2>
-                <div class="message-container">
-                    <div class="message-tabs">
-                        <button class="message-tab active" data-tab="mentions">@我的</button>
-                        <button class="message-tab" data-tab="comments">评论</button>
-                        <button class="message-tab" data-tab="replies">回复</button>
-                    </div>
-                    
-                    <div class="message-list" id="mentionsTab">
-                        <div class="message-loading" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i> 加载中...
-                        </div>
-                        
-                        <div class="message-empty" style="display:none;">
-                            <i class="fas fa-inbox"></i>
-                            <p>暂无@你的消息</p>
-                        </div>
-                        
-                        <!-- @消息动态加载 -->
-                        <div class="message-item">
-                            <div class="message-avatar" style="background-image: url('https://operate-js.github.io/text/logo.svg');"></div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-user">系统管理员</span>
-                                    <span class="message-time">2025-08-23 10:30</span>
-                                </div>
-                                <div class="message-text">
-                                    <span class="message-mention">@你</span> 欢迎使用班级论坛系统！
-                                </div>
-                                <div class="message-source">
-                                    来自: <a href="#">系统公告</a>
-                                </div>
-                                <div class="message-actions">
-                                    <span class="message-action">回复</span>
-                                    <span class="message-action">标记已读</span>
-                                    <span class="message-action">删除</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="message-list" id="commentsTab" style="display:none;">
-                        <div class="message-loading" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i> 加载中...
-                        </div>
-                        
-                        <div class="message-empty" style="display:none;">
-                            <i class="fas fa-inbox"></i>
-                            <p>暂无评论消息</p>
-                        </div>
-                        
-                        <!-- 评论消息动态加载 -->
-                    </div>
-                    
-                    <div class="message-list" id="repliesTab" style="display:none;">
-                        <div class="message-loading" style="display:none;">
-                            <i class="fas fa-spinner fa-spin"></i> 加载中...
-                        </div>
-                        
-                        <div class="message-empty" style="display:none;">
-                            <i class="fas fa-inbox"></i>
-                            <p>暂无回复消息</p>
-                        </div>
-                        
-                        <!-- 回复消息动态加载 -->
-                    </div>
-                </div>
             </div>
 
     <!-- 登录模态框 -->
@@ -1528,89 +1469,7 @@
         const API_KEY = decryptBase64("VmpKd1MyTXdNVWhTYTJ4WFlsZDRXbFJVUWt0aU1YQkdWMVJTYkZKVVJsZFZNblJUVldzeFIyTkdhRlZXUlVwNVdrUktWMUpYU2tkaFJuQnBVak5vTVZkc1pEUlNNRFZIVjJ0V1UySkhhRnBVVlZKelpHeHNXV05IT1ZaU01GcDVXbFZTVDFaWFNsZFRWRUpYVWpOb2VsWnJWVEZXTVZaeVpFZHdUbUpGY0hwV1YzUnJWREF3ZVZWdVVsTmhiRnBSVld0a2IxVkdXa2RWYXpsVFZtdHNNMXBJY0ZkaFJscDBXa1JPVm1GclduSlpiWGhhWld4T1ZWRnNTbGRXVm5CS1ZteFdWMk14V1hoVVdHUlRZa1p3VkZsc1pGTmxiR3QzVm01a1QxcDZNRGs9", 5);
 
         
-        // 加载消息
-        async function loadMessages() {
-            const messagesContainer = document.getElementById('messagesContainer');
-            if (!messagesContainer) return;
-            
-            try {
-                const response = await fetch(MESSAGES_PATH, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Accept': 'application/vnd.github+json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`消息加载失败: ${response.status}`);
-                }
-                
-                const files = await response.json();
-                messagesContainer.innerHTML = '';
-                
-                let hasMessages = false;
-                
-                for (const file of files) {
-                    if (file.name.endsWith('.json')) {
-                        const messageResponse = await fetch(file.download_url);
-                        const messageData = await messageResponse.json();
-                        
-                        const messageElement = document.createElement('div');
-                        messageElement.className = 'message';
-                        messageElement.innerHTML = `
-                            <div class="message-header">
-                                <div class="post-author">
-                                    <div class="author-avatar">${messageData.sender.charAt(0)}</div>
-                                    <div class="author-name">${messageData.sender}</div>
-                                </div>
-                                <div class="message-time">${messageData.time}</div>
-                            </div>
-                            <div class="message-content">${messageData.content}</div>
-                        `;
-                        messagesContainer.appendChild(messageElement);
-                        hasMessages = true;
-                    }
-                }
-                
-                // 如果没有真实消息，显示示例数据
-                if (!hasMessages) {
-                    EXAMPLE_MESSAGES.forEach(message => {
-                        const messageElement = document.createElement('div');
-                        messageElement.className = 'message';
-                        messageElement.innerHTML = `
-                            <div class="message-header">
-                                <div class="post-author">
-                                    <div class="author-avatar">${message.sender.charAt(0)}</div>
-                                    <div class="author-name">${message.sender}</div>
-                                </div>
-                                <div class="message-time">${message.time}</div>
-                            </div>
-                            <div class="message-content">${message.content}</div>
-                        `;
-                        messagesContainer.appendChild(messageElement);
-                    });
-                }
-            } catch (error) {
-                console.error('加载消息时出错:', error);
-                
-                // 如果加载失败，显示示例数据
-                EXAMPLE_MESSAGES.forEach(message => {
-                    const messageElement = document.createElement('div');
-                    messageElement.className = 'message';
-                    messageElement.innerHTML = `
-                        <div class="message-header">
-                            <div class="post-author">
-                                <div class="author-avatar">${message.sender.charAt(0)}</div>
-                                <div class="author-name">${message.sender}</div>
-                            </div>
-                            <div class="message-time">${message.time}</div>
-                        </div>
-                        <div class="message-content">${message.content}</div>
-                    `;
-                    messagesContainer.appendChild(messageElement);
-                });
-            }
-        }
+        
         
         let currentUser = null;
         let isAdmin = false;
@@ -2254,10 +2113,36 @@
         // 下载状态标志
         let isDownloadingComments = false;
         
+        // 全局维护已存在评论ID集合
+        const existingCommentIds = new Set();
+        
+        // 初始化时收集已有评论ID
+        function collectExistingCommentIds() {
+            document.querySelectorAll('.comment-item').forEach(el => {
+                if (el.dataset.id) existingCommentIds.add(el.dataset.id);
+            });
+        }
+        
+        // 页面加载时恢复评论数据（增强版防重复）
+        function restoreComments() {
+            collectExistingCommentIds();
+            const comments = JSON.parse(localStorage.getItem('forumComments') || '[]');
+            
+            // 只添加不存在的评论
+            comments.forEach(commentData => {
+                if (!existingCommentIds.has(commentData.senderTimestamp)) {
+                    addCommentToUI(commentData);
+                    existingCommentIds.add(commentData.senderTimestamp);
+                }
+            });
+        }
+        
         // 下载评论/回复数据
         async function downloadComments() {
             if (isDownloadingComments) {
                 console.log('评论下载已在进行中，跳过重复调用');
+                // 即使跳过下载，也尝试从本地恢复数据
+                restoreComments();
                 return;
             }
             
@@ -2273,9 +2158,7 @@
                 });
                 
                 if (!response.ok) {
-                    console.error('下载评论/回复失败: HTTP状态码', response.status);
-                    isDownloadingComments = false;
-                    return;
+                    throw new Error(`HTTP状态码: ${response.status}`);
                 }
                 
                 const data = await response.json();
@@ -2331,12 +2214,57 @@
                 }
                 
                 console.log(`成功添加${addedCount}条新评论/回复`);
+                
+                // 更新未读消息数量
+                updateUnreadCount();
             } catch (error) {
                 console.error('下载评论错误:', error);
+                // 即使下载失败，也尝试从本地恢复数据
+                restoreComments();
+            } finally {
+                isDownloadingComments = false;
             }
         }
         
-        // 添加评论到UI（带重试机制）
+        // 页面加载时恢复评论数据
+        document.addEventListener('DOMContentLoaded', restoreComments);
+        
+        // 更新未读消息数量
+        function updateUnreadCount() {
+            const unreadMessages = document.querySelectorAll('.comment-item').length;
+            const unreadBadge = document.querySelector('.unread-badge');
+            
+            if (unreadMessages > 0) {
+                if (!unreadBadge) {
+                    const badge = document.createElement('div');
+                    badge.className = 'unread-badge';
+                    badge.textContent = unreadMessages > 999 ? '...' : unreadMessages;
+                    document.querySelector('.user-controls').appendChild(badge);
+                } else {
+                    unreadBadge.textContent = unreadMessages > 999 ? '...' : unreadMessages;
+                }
+            } else if (unreadBadge) {
+                unreadBadge.remove();
+            }
+        }
+        
+        
+        
+        
+        
+
+        
+        // 检查登录状态
+        function checkLoginBeforeComment(button) {
+            const userName = localStorage.getItem('userName');
+            if (!userName) {
+                alert('请先登录后再发表评论');
+                return false;
+            }
+            return sendComment(button);
+        }
+
+        // 添加评论到UI（带重试机制和消息中心处理）
         async function addCommentToUI(commentData) {
             // 调试日志
             console.log('处理评论数据:', commentData);
@@ -2359,6 +2287,8 @@
                 return;
             }
             
+
+            
             // 创建评论项
             const commentItem = document.createElement('div');
             commentItem.className = 'comment-item';
@@ -2374,15 +2304,27 @@
             // 调试日志
             console.log('创建新评论:', commentData.senderTimestamp, content);
             
+            // 如果是回复消息，添加@目标用户信息
+            const replyInfo = isReply ? 
+                `<div class="reply-to" style="font-size: 0.8em; color: var(--secondary); margin-left: 61px; margin-top: -20px;">
+                    @${commentData.Target_mailbox || '目标用户'}
+                </div>` : '';
+                
             commentItem.innerHTML = `
                 <div class="comment-author">
                     <div class="author-avatar"></div>
                     <div class="author-name">${userName}</div>
                     <div class="comment-time">${new Date(commentData.timestamp).toLocaleString()}</div>
                 </div>
+                ${replyInfo}
                 <div class="comment-content">${commentContent}</div>
                 <button class="btn btn-primary reply-btn" onclick="showReplyInput(this)">回复</button>
             `;
+            
+            // 保存评论数据到localStorage
+            const comments = JSON.parse(localStorage.getItem('forumComments') || '[]');
+            comments.push(commentData);
+            localStorage.setItem('forumComments', JSON.stringify(comments));
             
             // 最大重试次数（防止无限循环）
             const MAX_RETRY = 100;
@@ -2392,7 +2334,7 @@
                 try {
                     // 处理源评论（send_to为0）
                     if (commentData.send_to === 0 || commentData.send_to === 'post') {
-                        const postId = commentData.Target_mailbox || commentData.targetTimestamp;
+                        const postId = commentData.targetTimestamp;
                         if (!postId) {
                             console.error('添加评论失败：缺少目标帖子ID');
                             break;
@@ -2413,7 +2355,7 @@
                             commentSection.innerHTML = `
                                 <div class="comment-input-container">
                                     <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
-                                    <button class="btn btn-primary comment-submit" onclick="sendComment(this)">发送评论</button>
+                                    <button class="btn btn-primary comment-submit" onclick="checkLoginBeforeComment(this)">发送评论</button>
                                 </div>
                                 <div class="comment-list"></div>
                             `;
@@ -2426,45 +2368,178 @@
                             break;
                         }
                         
-                        // 插入到评论列表顶部（最新在最上）
-                        commentList.insertBefore(commentItem, commentList.firstChild);
+                        // 为当前帖子创建专属隐藏容器(如果不存在)
+                        const commentPostId = commentData.targetTimestamp || 'default';
+                        let hiddenCommentContainer = document.querySelector(`.hidden-comment-container[data-post-id="${commentPostId}"]`);
+                        if (!hiddenCommentContainer) {
+                            hiddenCommentContainer = document.createElement('div');
+                            hiddenCommentContainer.className = 'hidden-comment-container';
+                            hiddenCommentContainer.dataset.postId = commentPostId;
+                            hiddenCommentContainer.style.display = 'none';
+                            document.body.appendChild(hiddenCommentContainer);
+                        }
+                        
+                        // 严格去重检查(包括隐藏容器中的评论)
+                        const allComments = Array.from(hiddenCommentContainer.querySelectorAll('.comment-item'));
+                        const isDuplicate = allComments.some(comment => {
+                            const isSameContent = comment.querySelector('.comment-content').textContent === commentData.content;
+                            const isSameTimestamp = comment.dataset.id === commentData.senderTimestamp.toString();
+                            const replyToElement = comment.querySelector('.reply-to');
+                            const isSameReplyTo = replyToElement ? 
+                                replyToElement.textContent.trim() === `@${commentData.replyTo || ''}` : 
+                                !commentData.replyTo;
+                            return isSameContent && isSameTimestamp && isSameReplyTo;
+                        });
+                        if (isDuplicate) return;
+                        
+                        // 添加新评论到对应帖子的隐藏容器
+                        hiddenCommentContainer.appendChild(commentItem);
+                        
+                        // 清空当前显示的评论列表
+                        commentList.innerHTML = '';
+                        
+                        // 从隐藏容器获取所有评论并按时间排序
+                        const sortedComments = Array.from(hiddenCommentContainer.querySelectorAll('.comment-item'))
+                            .sort((a, b) => parseInt(b.dataset.id) - parseInt(a.dataset.id));
+                        
+                        // 清空当前显示的评论列表
+                        commentList.innerHTML = '';
+                        
+                        // 确保移除所有旧的展开按钮
+                        const oldButtons = commentList.querySelectorAll('.expand-comments');
+                        oldButtons.forEach(btn => btn.remove());
+                        
+                        // 总是显示展开按钮(检测隐藏容器中的评论)
+                        const hiddenComments = Array.from(hiddenCommentContainer.querySelectorAll('.comment-item'));
+                        const expandButton = document.createElement('div');
+                        expandButton.className = 'expand-comments';
+                        expandButton.textContent = `展开评论(${hiddenComments.length})`;
+                        expandButton.style.display = 'block';
+                        expandButton.onclick = () => {
+                            // 清空当前显示
+                            commentList.innerHTML = '';
+                            
+                            // 显示所有评论
+                            hiddenComments.forEach(comment => {
+                                const clonedComment = comment.cloneNode(true);
+                                clonedComment.classList.add('show');
+                                commentList.appendChild(clonedComment);
+                            });
+                            
+                            // 隐藏展开按钮
+                            expandButton.style.display = 'none';
+                        };
+                        commentList.appendChild(expandButton);
+                        
                         return; // 添加成功，退出函数
                     } else {
                         // 处理回复评论
-                        if (!commentData.targetTimestamp) {
-                            console.error('添加回复失败：缺少目标评论ID');
+                        if (!commentData.targetPostId) {
+                            console.error('添加回复失败：缺少目标帖子ID');
                             break;
                         }
                         
-                        const targetComment = document.querySelector(`.comment-item[data-id="${commentData.targetTimestamp}"]`);
-                        if (!targetComment) {
-                            retryCount++;
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                            continue;
+                        // 尝试查找目标帖子，最多等待3秒
+                        let postItem = null;
+                        let waitCount = 0;
+                        const maxWaitCount = 6; // 6 * 500ms = 3秒
+                        
+                        while (!postItem && waitCount < maxWaitCount) {
+                            postItem = document.querySelector(`.post-item[data-id="${commentData.targetPostId}"]`);
+                            if (!postItem) {
+                                waitCount++;
+                                await new Promise(resolve => setTimeout(resolve, 500));
+                            }
                         }
                         
-                        // 确保目标评论有回复容器
-                        let replyContainer = targetComment.querySelector('.reply-list');
-                        if (!replyContainer) {
-                            replyContainer = document.createElement('div');
-                            replyContainer.className = 'reply-list';
-                            replyContainer.style.marginTop = '10px';
-                            replyContainer.style.borderLeft = '2px solid #eee';
-                            replyContainer.style.paddingLeft = '10px';
-                            targetComment.appendChild(replyContainer);
+                        if (!postItem) {
+                            console.error(`无法找到目标帖子: ${commentData.targetPostId}`);
+                            break;
                         }
                         
-                        // 确保回复消息有正确的样式类
-                        commentItem.classList.add('comment-item');
-                        commentItem.style.marginLeft = '15px';
-                        commentItem.style.marginTop = '5px';
+                        // 确保帖子有评论区域
+                        let commentSection = postItem.querySelector('.comment-section');
+                        if (!commentSection) {
+                            commentSection = document.createElement('div');
+                            commentSection.className = 'comment-section';
+                            commentSection.innerHTML = `
+                                <div class="comment-input-container">
+                                    <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
+                                    <button class="btn btn-primary comment-submit" onclick="checkLoginBeforeComment(this)">发送评论</button>
+                                </div>
+                                <div class="comment-list"></div>
+                            `;
+                            postItem.appendChild(commentSection);
+                        }
                         
-                        // 插入到回复容器顶部（最新在最上）
-                        replyContainer.insertBefore(commentItem, replyContainer.firstChild);
+                        const commentList = commentSection.querySelector('.comment-list');
+                        if (!commentList) {
+                            console.error('添加回复失败：未找到评论列表');
+                            break;
+                        }
                         
-                        // 确保回复可见
-                        replyContainer.style.display = 'block';
-                        console.log('回复消息已添加:', commentData);
+                        // 确保评论项已正确创建
+                        if (!commentItem || !commentItem.innerHTML) {
+                            console.error('评论项未正确创建');
+                            break;
+                        }
+                        
+                        // 为当前帖子创建专属隐藏容器(如果不存在)
+                        const commentPostId = commentData.targetPostId || 'default';
+                        let hiddenCommentContainer = document.querySelector(`.hidden-comment-container[data-post-id="${commentPostId}"]`);
+                        if (!hiddenCommentContainer) {
+                            hiddenCommentContainer = document.createElement('div');
+                            hiddenCommentContainer.className = 'hidden-comment-container';
+                            hiddenCommentContainer.dataset.postId = commentPostId;
+                            hiddenCommentContainer.style.display = 'none';
+                            document.body.appendChild(hiddenCommentContainer);
+                        }
+                        
+                        // 严格去重检查(包括隐藏容器中的评论)
+                        const allComments = Array.from(hiddenCommentContainer.querySelectorAll('.comment-item'));
+                        const isDuplicate = allComments.some(comment => {
+                            const isSameContent = comment.querySelector('.comment-content').textContent === commentData.content;
+                            const isSameTimestamp = comment.dataset.id === commentData.senderTimestamp.toString();
+                            const replyToElement = comment.querySelector('.reply-to');
+                            const isSameReplyTo = replyToElement ? 
+                                replyToElement.textContent.trim() === `@${commentData.replyTo || ''}` : 
+                                !commentData.replyTo;
+                            return isSameContent && isSameTimestamp && isSameReplyTo;
+                        });
+                        if (isDuplicate) return;
+                        
+                        // 添加新评论到隐藏容器
+                        hiddenCommentContainer.appendChild(commentItem);
+                        
+                        // 清空当前显示的评论列表
+                        commentList.innerHTML = '';
+                        
+                        // 从隐藏容器获取所有评论并按时间排序
+                        const sortedComments = Array.from(hiddenCommentContainer.querySelectorAll('.comment-item'))
+                            .sort((a, b) => parseInt(b.dataset.id) - parseInt(a.dataset.id));
+                        
+                        // 创建展开按钮
+                        const expandButton = document.createElement('div');
+                        expandButton.className = 'expand-comments';
+                        expandButton.textContent = `展开更多评论(${sortedComments.length})`;
+                        expandButton.style.display = 'block';
+                        expandButton.onclick = () => {
+                            // 清空当前显示
+                            commentList.innerHTML = '';
+                            
+                            // 显示所有评论
+                            sortedComments.forEach(comment => {
+                                const clonedComment = comment.cloneNode(true);
+                                clonedComment.classList.add('show');
+                                commentList.appendChild(clonedComment);
+                            });
+                            
+                            // 隐藏展开按钮
+                            expandButton.style.display = 'none';
+                        };
+                        commentList.appendChild(expandButton);
+                        
+                        console.log('回复消息已添加到帖子:', commentData);
                         return; // 添加成功，退出函数
                     }
                 } catch (e) {
@@ -2554,7 +2629,7 @@
                             <div class="comment-section">
                                 <div class="comment-input-container">
                                     <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
-                                    <button class="btn btn-primary comment-submit" onclick="sendComment(this)">发送评论</button>
+                                    <button class="btn btn-primary comment-submit" onclick="checkLoginBeforeComment(this)">发送评论</button>
                                 </div>
                                 <div class="comment-list">
                                     
@@ -3644,6 +3719,7 @@
             fetchUserData();
             loadMaterials();
             loadChatMessages();
+            loadPosts();
             loadHonors();
             
             // 页面切换时初始化滚动
@@ -3766,14 +3842,19 @@
             // 获取帖子ID
             const postId = button.closest('.post-item').dataset.id;
             
-            // 构造评论数据
+            // 获取帖子作者邮箱
+            const postItem = button.closest('.post-item');
+            const postAuthorEmail = postItem.querySelector('.post-author').dataset.email || 'unknown@example.com';
+            
+            // 构造评论数据（使用 targetTimestamp 关联源贴）
             const commentData = {
                 comment: commentContent,
                 send_to: 0,
-                Target_mailbox: postId,
+                Target_mailbox: postAuthorEmail,
                 timestamp: new Date().getTime(),
-                sender: currentUser, // 保存评论者邮箱
-                senderTimestamp: new Date().getTime()
+                sender: currentUser,
+                senderTimestamp: new Date().getTime(),
+                targetTimestamp: postId // 直接使用帖子ID作为时间戳标识
             };
             
             // 将数据转换为 JSON 字符串并编码为 Base64
@@ -3816,6 +3897,7 @@
                         const commentItem = document.createElement('div');
                         commentItem.className = 'comment-item';
                         commentItem.dataset.sender = currentUser; // 保存评论者邮箱
+                        commentItem.dataset.targetTimestamp = postId; // 保存关联的源贴ID
                         commentItem.innerHTML = `
                             <div class="comment-author">
                                 <div class="author-avatar"></div>
@@ -3857,6 +3939,7 @@
             // 获取评论项和目标用户邮箱
             const commentItem = button.closest('.comment-item');
             const targetMailbox = commentItem.dataset.sender || 'unknown@example.com';
+            const targetCommentId = commentItem.dataset.id || ''; // 获取目标评论ID
 
             // 构造回复数据
             const replyData = {
@@ -3865,8 +3948,10 @@
                 Target_mailbox: targetMailbox,
                 timestamp: new Date().toISOString(),
                 sender: currentUser,
-                targetTimestamp: new Date(commentItem.querySelector('.comment-time').textContent).getTime(),
-                senderTimestamp: new Date().getTime()
+                targetTimestamp: commentItem.dataset.timestamp || new Date().getTime(), // 直接使用目标评论的timestamp键值
+                senderTimestamp: new Date().getTime(),
+                targetPostId: commentItem.closest('.post-item').dataset.id, // 添加目标帖子ID
+                targetCommentId: targetCommentId // 添加目标评论ID
             };
             
             // 将数据转换为 JSON 字符串并编码为 Base64
@@ -3917,6 +4002,7 @@
                             <div class="comment-time">${new Date().toLocaleString()}</div>
                         </div>
                         <div class="comment-content">${replyContent}</div>
+                        <div class="reply-arrow" style="position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 15px; height: 2px; background-color: #999; border-left: 2px solid #999; transition: all 0.3s ease; z-index: 1;"></div>
                         <button class="btn btn-primary reply-btn" onclick="showReplyInput(this)">回复</button>
                     `;
                     
